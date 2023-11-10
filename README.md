@@ -1,2 +1,14 @@
 # YOLOv8
-YOLOv8 detection and segmention sample using ONNXRUNTIME in c++
+YOLOv8 detection and segmentation sample in C++  
+#
+### YOLOv8 Segmentation OpenCV DNN
+Segmentation based on "OpenCV DNN" added.  
+----- Need to OpenCV  
+----- Output contains:  
+---------- Detected object ClassID(int)  
+---------- Detected object Confidence(float)  
+---------- Detected object box(cv::Rect)  
+---------- Mask of detected box(cv::Mat)  
+---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
+TODO: Working on batchSize > 1  
+#
