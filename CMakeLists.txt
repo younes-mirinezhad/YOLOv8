@@ -18,6 +18,19 @@ add_executable(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
+# ----------------- Checking CUDA ------------------#
+
+find_package(CUDA)
+if(CUDA_FOUND)
+    message("********** CUDA founded")
+    ADD_DEFINITIONS( -DCUDA_STATUS=true )
+else()
+    message("********** CUDA not founded")
+    ADD_DEFINITIONS( -DCUDA_STATUS=false )
+endif(CUDA_FOUND)
+# Force to use CPU
+#ADD_DEFINITIONS( -DCUDA_STATUS=false )
+
 # ----------------- OpenCV  ------------------#
 
 find_package(OpenCV REQUIRED)
