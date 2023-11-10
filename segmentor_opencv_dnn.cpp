@@ -61,7 +61,7 @@ BatchSegmentedObject Segmentor_OpenCV_DNN::Run(MatVector &srcImgList)
     qDebug() << Q_FUNC_INFO;
 
     // TODO: just work with bachNumber=1
-    if(_batchSize > 1) {
+    if(_batchSize > 1 || srcImgList.size() > 1) {
         qDebug() <<"This class just work with batchNumber=1";
         return {};
     }
@@ -125,7 +125,6 @@ BatchSegmentedObject Segmentor_OpenCV_DNN::Run(MatVector &srcImgList)
     std::vector<std::vector<float>> temp_mask_proposals;
     cv::Rect holeImgRect(0, 0, srcImg.cols, srcImg.rows);
     for (int i = 0; i < nms_result.size(); ++i) {
-
         int idx = nms_result[i];
         SegmentedObject result;
         result.classID = class_ids[idx];

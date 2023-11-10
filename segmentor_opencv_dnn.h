@@ -3,6 +3,9 @@
 #include <opencv2/opencv.hpp>
 
 struct MaskParams {
+    //int segChannels = 32;
+    //int segWidth = 160;
+    //int segHeight = 160;
     int netWidth = 640;
     int netHeight = 640;
     float maskThreshold = 0.5;
