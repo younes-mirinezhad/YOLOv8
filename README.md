@@ -12,3 +12,6 @@ Segmentation based on "OpenCV DNN" added.
 ---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
 TODO: Working on batchSize > 1  
 #
+#
+### References
+1: <a href="https://github.com/UNeedCryDear/yolov8-opencv-onnxruntime-cpp">yolov8-opencv-onnxruntime-cpp</a>
