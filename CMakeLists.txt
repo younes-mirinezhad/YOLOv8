@@ -16,7 +16,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 add_executable(${PROJECT_NAME}
   main.cpp
   segmentor.h segmentor.cpp
+  detector.h detector.cpp
   segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
+  detector_opencv_dnn.h detector_opencv_dnn.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
