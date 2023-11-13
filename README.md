@@ -1,9 +1,18 @@
 # YOLOv8
 YOLOv8 detection and segmentation sample in C++  
 #
+### YOLOv8 Detection OpenCV DNN
+Detection based on "OpenCV DNN".  
+----- Only need to OpenCV  
+----- Output contains:  
+---------- Detected object ClassID(int)  
+---------- Detected object Confidence(float)  
+---------- Detected object box(cv::Rect)  
+TODO: Working on batchSize > 1  
+#
 ### YOLOv8 Segmentation OpenCV DNN
-Segmentation based on "OpenCV DNN" added.  
------ Need to OpenCV  
+Segmentation based on "OpenCV DNN".  
+----- Only need to OpenCV  
 ----- Output contains:  
 ---------- Detected object ClassID(int)  
 ---------- Detected object Confidence(float)  
