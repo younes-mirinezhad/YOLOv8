@@ -34,7 +34,7 @@ bool Detector_OpenCV_DNN::LoadModel(QString &modelPath)
 
 #if CV_VERSION_MAJOR==4 && CV_VERSION_MINOR==7 && CV_VERSION_REVISION==0
         model.enableWinograd(false); //bug of opencv4.7.x in AVX only platform ,https://github.com/opencv/opencv/pull/23112 and https://github.com/opencv/opencv/issues/23080
-        model.enableWinograd(true); //If your CPU supports AVX2, you can set it true to speed up
+//        model.enableWinograd(true); //If your CPU supports AVX2, you can set it true to speed up
 #endif
 
 #if CUDA_Availability
