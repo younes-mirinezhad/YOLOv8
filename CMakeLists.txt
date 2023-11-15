@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}
   detector.h detector.cpp
   segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
   detector_opencv_dnn.h detector_opencv_dnn.cpp
+  segmentor_onnxruntime.h segmentor_onnxruntime.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 

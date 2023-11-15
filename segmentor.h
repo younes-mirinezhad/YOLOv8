@@ -14,6 +14,17 @@ struct SegmentedObject {
 using ImagesSegmentedObject = std::vector<SegmentedObject>;
 using BatchSegmentedObject = std::vector<ImagesSegmentedObject>;
 
+struct MaskParams {
+    //int segChannels = 32;
+    //int segWidth = 160;
+    //int segHeight = 160;
+    int netWidth = 640;
+    int netHeight = 640;
+    float maskThreshold = 0.5;
+    cv::Size srcImgShape;
+    cv::Vec4d params;
+};
+
 class Segmentor : public QObject
 {
 public:

@@ -9,7 +9,7 @@ public:
     explicit Detector_OpenCV_DNN(QObject *parent = nullptr);
 
     bool LoadModel(QString& modelPath) override;
-    virtual BatchDetectedObject Run(MatVector& srcImgList) override;
+    BatchDetectedObject Run(MatVector& srcImgList) override;
 
 private:
     cv::dnn::Net model;
