@@ -11,8 +11,9 @@ void Segmentor::setClassNames(std::vector<std::string> newClassNamesList)
 
 void Segmentor::setBatchSize(int newBatch)
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO << newBatch;
 
+    if (newBatch < 1) newBatch = 1;
     _batchSize = newBatch;
 }
 
