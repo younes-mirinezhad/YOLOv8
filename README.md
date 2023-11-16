@@ -20,6 +20,18 @@ Segmentation based on "OpenCV DNN".
 ---------- Mask of detected box(cv::Mat)  
 ---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
 TODO: Working on batchSize > 1  
+### YOLOv8 Segmentation ONNX Runtime
+Segmentation based on "ONNX Runtime".  
+----- Only need to OpenCV and ONNX Runtime  
+---------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime
+----- Output contains:  
+---------- Detected object ClassID(int)  
+---------- Detected object Confidence(float)  
+---------- Detected object box(cv::Rect)  
+---------- Mask of detected box(cv::Mat)  
+---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
+TODO: Working on batchSize > 1  
+TODO: Working on GPU inference  
 #
 #
 ### References
