@@ -23,7 +23,7 @@ TODO: Working on batchSize > 1
 ### YOLOv8 Segmentation ONNX Runtime
 Segmentation based on "ONNX Runtime".  
 ----- Only need to OpenCV and ONNX Runtime  
----------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime
+---------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
 ----- Output contains:  
 ---------- Detected object ClassID(int)  
 ---------- Detected object Confidence(float)  
