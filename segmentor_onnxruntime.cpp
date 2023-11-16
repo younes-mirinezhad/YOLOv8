@@ -116,6 +116,14 @@ bool Segmentor_ONNXRUNTIME::LoadModel(QString &modelPath)
 
 BatchSegmentedObject Segmentor_ONNXRUNTIME::Run(MatVector &srcImgList)
 {
+    qDebug() << Q_FUNC_INFO;
+
+    // TODO: just work with bachNumber=1
+    if(_batchSize > 1 || srcImgList.size() > 1) {
+        qDebug() <<"This class just work with batchNumber=1";
+        return {};
+    }
+
     BatchSegmentedObject batchOutput;
 
     std::vector<cv::Vec4d> params;
@@ -144,6 +152,7 @@ BatchSegmentedObject Segmentor_ONNXRUNTIME::Run(MatVector &srcImgList)
     int mask_protos_length = VectorProduct(mask_protos_shape);
     int64_t one_output_length = VectorProduct(_outputTensorShape) / _outputTensorShape[0];
     int net_width = (int)_outputTensorShape[1];
+
     for (int img_index = 0; img_index < srcImgList.size(); ++img_index) {
         cv::Mat output0 = cv::Mat(cv::Size((int)_outputTensorShape[2], (int)_outputTensorShape[1]), CV_32F, all_data).t();  //[bs,116,8400]=>[bs,8400,116]
         all_data += one_output_length;
@@ -198,17 +207,18 @@ BatchSegmentedObject Segmentor_ONNXRUNTIME::Run(MatVector &srcImgList)
         mask_params.netWidth = _inputSize.width;
         mask_params.maskThreshold = _maskThreshold;
         cv::Mat mask_protos = cv::Mat(mask_protos_shape, CV_32F, output_tensors[1].GetTensorMutableData<float>() + img_index * mask_protos_length);
+
+        //***********************************
         for (int i = 0; i < temp_mask_proposals.size(); ++i) {
             GetMask2(cv::Mat(temp_mask_proposals[i]).t(), mask_protos, imageOutput[i], mask_params);
         }
-
         //***********************************
         // If the GetMask2() still reports errors , it is recommended to use GetMask().
-        //cv::Mat mask_proposals;
-        //for (int i = 0; i < temp_mask_proposals.size(); ++i) {
-        //    mask_proposals.push_back(cv::Mat(temp_mask_proposals[i]).t());
-        //}
-        //GetMask(mask_proposals, mask_protos, imageOutput, mask_params);
+//        cv::Mat mask_proposals;
+//        for (int i = 0; i < temp_mask_proposals.size(); ++i) {
+//            mask_proposals.push_back(cv::Mat(temp_mask_proposals[i]).t());
+//        }
+//        GetMask(mask_proposals, mask_protos, imageOutput, mask_params);
         //***********************************
 
         calcContours(imageOutput);
