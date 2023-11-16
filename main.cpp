@@ -3,6 +3,7 @@
 #include "detector_opencv_dnn.h"
 #include "segmentor.h"
 #include "segmentor_opencv_dnn.h"
+#include "segmentor_onnxruntime.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,7 +36,8 @@ int main(int argc, char *argv[])
     //##################### Segmentor
     {
         Segmentor *segmentor{nullptr};
-        segmentor = new Segmentor_OpenCV_DNN;
+//        segmentor = new Segmentor_OpenCV_DNN;
+        segmentor = new Segmentor_ONNXRUNTIME;
 
         QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m-seg.onnx";
         auto modelStatus = segmentor->LoadModel(modelPath);
@@ -72,29 +74,29 @@ int main(int argc, char *argv[])
 
     //##################### Detector
     {
-        Detector *detector{nullptr};
-        detector = new Detector_OpenCV_DNN;
+//        Detector *detector{nullptr};
+//        detector = new Detector_OpenCV_DNN;
 
-        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
-        auto modelStatus = detector->LoadModel(modelPath);
+//        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
+//        auto modelStatus = detector->LoadModel(modelPath);
 
-        if(modelStatus){
-            detector->setClassNames(_classNamesList);
-            detector->setBatchSize(batchSize);
-            detector->setInputSize(inputSize);
+//        if(modelStatus){
+//            detector->setClassNames(_classNamesList);
+//            detector->setBatchSize(batchSize);
+//            detector->setInputSize(inputSize);
 
-            auto result = detector->Run(imgList);
+//            auto result = detector->Run(imgList);
 
-            auto color_box = cv::Scalar(0, 0, 255);
-            cv::Mat boxImg = img.clone();
-            for (int i = 0; i < result[0].size(); ++i) {
-                cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
-                cv::putText(boxImg, _classNamesList[result[0][i].classID],
-                            cv::Point(result[0][i].box.x, result[0][i].box.y),
-                            cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-            }
-            cv::imshow("Detection Box", boxImg);
-        }
+//            auto color_box = cv::Scalar(0, 0, 255);
+//            cv::Mat boxImg = img.clone();
+//            for (int i = 0; i < result[0].size(); ++i) {
+//                cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
+//                cv::putText(boxImg, _classNamesList[result[0][i].classID],
+//                            cv::Point(result[0][i].box.x, result[0][i].box.y),
+//                            cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+//            }
+//            cv::imshow("Detection Box", boxImg);
+//        }
     }
 
     return a.exec();

@@ -42,6 +42,19 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
+# ----------------- ONNXRUNTIME  ------------------#
+
+SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${ONNXRUNTIME_DIR}/include")
+
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/onnxruntime.lib")
+endif(WIN32)
+if (UNIX)
+    target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/libonnxruntime.so")
+endif(UNIX)
+
 # --------------------------------------------#
 
 include(GNUInstallDirs)

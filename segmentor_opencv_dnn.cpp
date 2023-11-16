@@ -41,18 +41,18 @@ bool Segmentor_OpenCV_DNN::LoadModel(QString &modelPath)
         qDebug() << "----- Inference device: CUDA";
         model.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA); //DNN_TARGET_CUDA or DNN_TARGET_CUDA_FP16
-        qDebug() << "---------- Model is loaded ";
 #else
         qDebug() << "----- Inference device: CPU";
         model.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-        qDebug() << "---------- Model is loaded ";
 #endif
     }
     catch (const std::exception&) {
         qDebug() << "----- Can't load model:" << modelPath;
         return false;
     }
+
+    qDebug() << "---------- Model is loaded ";
     return true;
 }
 
