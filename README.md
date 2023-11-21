@@ -31,7 +31,6 @@ Segmentation based on "ONNX Runtime".
 ---------- Mask of detected box(cv::Mat)  
 ---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
 TODO: Working on batchSize > 1  
-TODO: Working on GPU inference  
 #
 #
 ### References

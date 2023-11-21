@@ -48,40 +48,40 @@ int main(int argc, char *argv[])
 
     //##################### Detector
     {
-        Detector *detector{nullptr};
-        detector = new Detector_OpenCV_DNN;
+//        Detector *detector{nullptr};
+//        detector = new Detector_OpenCV_DNN;
 
-        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
-        auto modelStatus = detector->LoadModel(modelPath);
-        if(!modelStatus)
-            return{};
+//        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
+//        auto modelStatus = detector->LoadModel(modelPath);
+//        if(!modelStatus)
+//            return{};
 
-        detector->setClassNames(_classNamesList);
-        detector->setBatchSize(batchSize);
-        detector->setInputSize(inputSize);
+//        detector->setClassNames(_classNamesList);
+//        detector->setBatchSize(batchSize);
+//        detector->setInputSize(inputSize);
 
-        std::vector<cv::Mat> imgBatch;
-        for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
-            // make batch of images
-            if(imgBatch.size() < batchSize) {
-                imgBatch.push_back(imgList[imgIDX]);
-                continue;
-            }
+//        std::vector<cv::Mat> imgBatch;
+//        for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
+//            // make batch of images
+//            if(imgBatch.size() < batchSize) {
+//                imgBatch.push_back(imgList[imgIDX]);
+//                continue;
+//            }
 
-            // get inference
-            auto result = detector->Run(imgBatch);
+//            // get inference
+//            auto result = detector->Run(imgBatch);
 
-            // prepare for next batch
-            imgBatch.clear();
-            imgIDX--;
-        }
+//            // prepare for next batch
+//            imgBatch.clear();
+//            imgIDX--;
+//        }
     }
 
     //##################### Segmentor
     {
         Segmentor *segmentor{nullptr};
-        segmentor = new Segmentor_OpenCV_DNN;
-//        segmentor = new Segmentor_ONNXRUNTIME;
+//        segmentor = new Segmentor_OpenCV_DNN;
+        segmentor = new Segmentor_ONNXRUNTIME;
 
         QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m-seg.onnx";
         auto modelStatus = segmentor->LoadModel(modelPath);

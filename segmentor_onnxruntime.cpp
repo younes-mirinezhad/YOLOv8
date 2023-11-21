@@ -27,8 +27,7 @@ bool Segmentor_ONNXRUNTIME::LoadModel(QString &modelPath)
 
         if (cuda_available != available_providers.end()) {
             qDebug() << "----- Inference device: CUDA";
-            //TODO: Need to build ONNXRUNTIME by GPU
-            //OrtStatus* status = OrtSessionOptionsAppendExecutionProvider_CUDA(_OrtSessionOptions, _cudaID);
+            OrtStatus* status = OrtSessionOptionsAppendExecutionProvider_CUDA(_OrtSessionOptions, _cudaID);
         }
         else if (cuda_available == available_providers.end()){
             qDebug() << "----- Your ORT build without GPU. Change to CPU.";

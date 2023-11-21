@@ -23,6 +23,12 @@ add_executable(${PROJECT_NAME}
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
+# ----------------- OpenCV  ------------------#
+
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+
 # ----------------- Checking CUDA ------------------#
 
 find_package(CUDA)
@@ -33,27 +39,35 @@ else()
     message("********** CUDA not founded")
     ADD_DEFINITIONS( -DCUDA_STATUS=false )
 endif(CUDA_FOUND)
+
 # Force to use CPU
 #ADD_DEFINITIONS( -DCUDA_STATUS=false )
 
-# ----------------- OpenCV  ------------------#
-
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-
 # ----------------- ONNXRUNTIME  ------------------#
 
-SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
 
-target_include_directories(${PROJECT_NAME} PRIVATE "${ONNXRUNTIME_DIR}/include")
 
 if (WIN32)
+    if(CUDA_FOUND)
+        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
+    else()
+        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
+    endif(CUDA_FOUND)
+
     target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/onnxruntime.lib")
 endif(WIN32)
+
 if (UNIX)
+    if(CUDA_FOUND)
+        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-gpu-1.16.2)
+    else()
+        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
+    endif(CUDA_FOUND)
+
     target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/libonnxruntime.so")
 endif(UNIX)
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${ONNXRUNTIME_DIR}/include")
 
 # --------------------------------------------#
 
