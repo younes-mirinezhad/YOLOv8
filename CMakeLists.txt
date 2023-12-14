@@ -15,10 +15,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 add_executable(${PROJECT_NAME}
   main.cpp
-  segmentor.h segmentor.cpp
   detector.h detector.cpp
-  segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
+  segmentor.h segmentor.cpp
   detector_opencv_dnn.h detector_opencv_dnn.cpp
+  segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
+  detector_onnxruntime.h detector_onnxruntime.cpp
   segmentor_onnxruntime.h segmentor_onnxruntime.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
@@ -45,16 +46,8 @@ endif(CUDA_FOUND)
 
 # ----------------- ONNXRUNTIME  ------------------#
 
-
-
 if (WIN32)
-    if(CUDA_FOUND)
-        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
-    else()
-        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
-    endif(CUDA_FOUND)
-
-    target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/onnxruntime.lib")
+    message("********** Fix ONNXRUNTIME libraries path")
 endif(WIN32)
 
 if (UNIX)

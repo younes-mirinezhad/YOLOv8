@@ -1,9 +1,85 @@
 #include <QCoreApplication>
 #include "detector.h"
-#include "detector_opencv_dnn.h"
 #include "segmentor.h"
+#include "detector_opencv_dnn.h"
 #include "segmentor_opencv_dnn.h"
+#include "detector_onnxruntime.h"
 #include "segmentor_onnxruntime.h"
+
+void segmentorFunc(Segmentor *segmentor, std::vector<std::string> _classNamesList, int batchSize, cv::Size inputSize, std::vector<cv::Mat> imgList)
+{
+    QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m-seg.onnx";
+    auto modelStatus = segmentor->LoadModel(modelPath);
+    if(!modelStatus)
+        return;
+
+    segmentor->setClassNames(_classNamesList);
+    segmentor->setBatchSize(batchSize);
+    segmentor->setInputSize(inputSize);
+
+    std::vector<cv::Mat> imgBatch;
+    for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
+        // make batch of images = 1
+        imgBatch.clear();
+        imgBatch.push_back(imgList[imgIDX]);
+
+        auto result = segmentor->Run(imgBatch);
+
+//        auto img = imgList[imgIDX];
+//        auto color_box = cv::Scalar(0, 0, 255);
+//        auto color_mask = cv::Scalar(0, 255, 0);
+//        auto color_contours = cv::Scalar(255, 0, 0);
+//        cv::Mat maskImg = img.clone();
+//        cv::Mat boxImg = img.clone();
+//        cv::Mat contoursImg = img.clone();
+//        for (int i = 0; i < result[0].size(); ++i) {
+//            maskImg(result[0][i].box).setTo(color_mask, result[0][i].boxMask);
+
+//            cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
+//            cv::putText(boxImg, _classNamesList[result[0][i].classID],
+//                        cv::Point(result[0][i].box.x, result[0][i].box.y),
+//                        cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+
+//            for(size_t c = 0; c< result[0][i].maskContoursList.size(); c++)
+//                drawContours(contoursImg, result[0][i].maskContoursList, (int)c, color_contours, 2, cv::LINE_8, {}, 0 );
+//        }
+//        cv::imshow("Segmentation Mask " + QString::number(imgIDX).toStdString(), maskImg);
+//        cv::imshow("Segmentation Box " + QString::number(imgIDX).toStdString(), boxImg);
+//        cv::imshow("Segmentation Contours " + QString::number(imgIDX).toStdString(), contoursImg);
+    }
+}
+void detectorFunc(Detector *detector, std::vector<std::string> _classNamesList, int batchSize, cv::Size inputSize, std::vector<cv::Mat> imgList)
+{
+    QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
+    auto modelStatus = detector->LoadModel(modelPath);
+    if(!modelStatus)
+        return;
+
+    detector->setClassNames(_classNamesList);
+    detector->setBatchSize(batchSize);
+    detector->setInputSize(inputSize);
+
+    std::vector<cv::Mat> imgBatch;
+
+    for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
+        // make batch of images = 1
+        imgBatch.clear();
+        imgBatch.push_back(imgList[imgIDX]);
+
+        auto result = detector->Run(imgBatch);
+
+//        auto img = imgList[imgIDX];
+//        auto color_box = cv::Scalar(0, 0, 255);
+//        cv::Mat boxImg = img.clone();
+//        for (int i = 0; i < result[0].size(); ++i) {
+//            cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
+//            cv::putText(boxImg, _classNamesList[result[0][i].classID],
+//                        cv::Point(result[0][i].box.x, result[0][i].box.y),
+//                        cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+//        }
+//        cv::imshow("Detection Box " + QString::number(imgIDX).toStdString(), boxImg);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -46,105 +122,17 @@ int main(int argc, char *argv[])
     auto batchSize = 1;
     auto inputSize = cv::Size(640, 640);
 
-    //##################### Detector
-    {
-//        Detector *detector{nullptr};
-//        detector = new Detector_OpenCV_DNN;
+    //--------------------------------------------------Detector
+    Detector *detector{nullptr};
+    detector = new Detector_OpenCV_DNN;
+    detector = new Detector_ONNXRUNTIME;
+    detectorFunc(detector, _classNamesList, batchSize, inputSize, imgList);
 
-//        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
-//        auto modelStatus = detector->LoadModel(modelPath);
-//        if(!modelStatus)
-//            return{};
-
-//        detector->setClassNames(_classNamesList);
-//        detector->setBatchSize(batchSize);
-//        detector->setInputSize(inputSize);
-
-//        std::vector<cv::Mat> imgBatch;
-//        for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
-//            // make batch of images
-//            if(imgBatch.size() < batchSize) {
-//                imgBatch.push_back(imgList[imgIDX]);
-//                continue;
-//            }
-
-//            // get inference
-//            auto result = detector->Run(imgBatch);
-
-//            // prepare for next batch
-//            imgBatch.clear();
-//            imgIDX--;
-//        }
-    }
-
-    //##################### Segmentor
-    {
-        Segmentor *segmentor{nullptr};
-//        segmentor = new Segmentor_OpenCV_DNN;
-        segmentor = new Segmentor_ONNXRUNTIME;
-
-        QString modelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m-seg.onnx";
-        auto modelStatus = segmentor->LoadModel(modelPath);
-        if(!modelStatus)
-            return{};
-
-        segmentor->setClassNames(_classNamesList);
-        segmentor->setBatchSize(batchSize);
-        segmentor->setInputSize(inputSize);
-
-        std::vector<cv::Mat> imgBatch;
-        for (int imgIDX = 0; imgIDX < imgList.size(); ++imgIDX) {
-            // make batch of images
-            if(imgBatch.size() < batchSize) {
-                imgBatch.push_back(imgList[imgIDX]);
-                continue;
-            }
-
-            // get inference
-            auto result = segmentor->Run(imgBatch);
-
-            // prepare for next batch
-            imgBatch.clear();
-            imgIDX--;
-        }
-    }
+    //--------------------------------------------------Segmentor
+    Segmentor *segmentor{nullptr};
+    segmentor = new Segmentor_OpenCV_DNN;
+    segmentor = new Segmentor_ONNXRUNTIME;
+    segmentorFunc(segmentor, _classNamesList, batchSize, inputSize, imgList);
 
     return a.exec();
 }
-
-
-
-//-------------------------------------Detector
-//auto img = imgList[imgIDX];
-//auto color_box = cv::Scalar(0, 0, 255);
-//cv::Mat boxImg = img.clone();
-//for (int i = 0; i < result[0].size(); ++i) {
-//    cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
-//    cv::putText(boxImg, _classNamesList[result[0][i].classID],
-//                cv::Point(result[0][i].box.x, result[0][i].box.y),
-//                cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-//}
-//cv::imshow("Detection Box " + QString::number(imgIDX).toStdString(), boxImg);
-
-//-------------------------------------Segmentor
-
-//auto color_box = cv::Scalar(0, 0, 255);
-//auto color_mask = cv::Scalar(0, 255, 0);
-//auto color_contours = cv::Scalar(255, 0, 0);
-//cv::Mat maskImg = img.clone();
-//cv::Mat boxImg = img.clone();
-//cv::Mat contoursImg = img.clone();
-//for (int i = 0; i < result[0].size(); ++i) {
-//    maskImg(result[0][i].box).setTo(color_mask, result[0][i].boxMask);
-
-//    cv::rectangle(boxImg, result[0][i].box, color_box, 2, 8);
-//    cv::putText(boxImg, _classNamesList[result[0][i].classID],
-//                cv::Point(result[0][i].box.x, result[0][i].box.y),
-//                cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-
-//    for(size_t c = 0; c< result[0][i].maskContoursList.size(); c++)
-//        drawContours(contoursImg, result[0][i].maskContoursList, (int)c, color_contours, 2, cv::LINE_8, {}, 0 );
-//}
-//cv::imshow("Segmentation Mask " + QString::number(imgIDX).toStdString(), maskImg);
-//cv::imshow("Segmentation Box " + QString::number(imgIDX).toStdString(), boxImg);
-//cv::imshow("Segmentation Contours " + QString::number(imgIDX).toStdString(), contoursImg);
