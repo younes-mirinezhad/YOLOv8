@@ -9,6 +9,15 @@ Detection based on "OpenCV DNN".
 ---------- Detected object Confidence(float)  
 ---------- Detected object box(cv::Rect)  
 TODO: Working on batchSize > 1  
+### YOLOv8 Detection ONNX Runtime
+Detection based on "ONNX Runtime".  
+----- Only need to OpenCV and ONNX Runtime  
+---------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
+----- Output contains:  
+---------- Detected object ClassID(int)  
+---------- Detected object Confidence(float)  
+---------- Detected object box(cv::Rect)  
+TODO: Working on batchSize > 1  
 #
 ### YOLOv8 Segmentation OpenCV DNN
 Segmentation based on "OpenCV DNN".  
