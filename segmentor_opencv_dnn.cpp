@@ -15,10 +15,16 @@ bool Segmentor_OpenCV_DNN::LoadModel(QString &modelPath)
 {
     qDebug() << Q_FUNC_INFO << modelPath;
 
+    if (!(QFileInfo::exists(modelPath) && QFileInfo(modelPath).isFile())) {
+        qDebug() << "----- Model path does not exist,  please check " << modelPath;
+        return false;
+    }
+
 #if CUDA_Availability
-    qDebug() << "Founded CUDA device info";
+    qDebug() << "----- Founded CUDA device info";
     int cuda_devices_count = cv::cuda::getCudaEnabledDeviceCount();
     for (int dev = 0; dev < cuda_devices_count; ++dev) {
+        qDebug() << " -------------------------------------------------- ";
         cv::cuda::printCudaDeviceInfo(dev);
         qDebug() << " -------------------------------------------------- ";
     }
@@ -26,16 +32,7 @@ bool Segmentor_OpenCV_DNN::LoadModel(QString &modelPath)
 
     try
     {
-        if (!(QFileInfo::exists(modelPath) && QFileInfo(modelPath).isFile())) {
-            qDebug() << "----- Model path does not exist,  please check " << modelPath;
-            return false;
-        }
-        model = cv::dnn::readNet(modelPath.toStdString());
-
-#if CV_VERSION_MAJOR==4 && CV_VERSION_MINOR==7 && CV_VERSION_REVISION==0
-        model.enableWinograd(false); //bug of opencv4.7.x in AVX only platform ,https://github.com/opencv/opencv/pull/23112 and https://github.com/opencv/opencv/issues/23080
-//        model.enableWinograd(true); //If your CPU supports AVX2, you can set it true to speed up
-#endif
+        model = cv::dnn::readNetFromONNX(modelPath.toStdString());
 
 #if CUDA_Availability
         qDebug() << "----- Inference device: CUDA";
@@ -43,7 +40,7 @@ bool Segmentor_OpenCV_DNN::LoadModel(QString &modelPath)
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA); //DNN_TARGET_CUDA or DNN_TARGET_CUDA_FP16
 #else
         qDebug() << "----- Inference device: CPU";
-        model.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
+        model.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
 #endif
     }

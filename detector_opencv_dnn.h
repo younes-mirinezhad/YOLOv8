@@ -1,7 +1,6 @@
 #pragma once
 
 #include "detector.h"
-#include <opencv2/opencv.hpp>
 
 class Detector_OpenCV_DNN : public Detector
 {

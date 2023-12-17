@@ -1,6 +1,5 @@
 #include "detector_onnxruntime.h"
 #include <QFileInfo>
-#include <opencv2/opencv.hpp>
 
 #if CUDA_STATUS
 #define CUDA_Availability true

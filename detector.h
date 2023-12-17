@@ -1,6 +1,6 @@
 #pragma once
 #include <QObject>
-#include "opencv2/core/types.hpp"
+#include <opencv2/opencv.hpp>
 #include <QDebug>
 
 using MatVector = std::vector<cv::Mat>;

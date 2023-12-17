@@ -21,21 +21,19 @@ add_executable(${PROJECT_NAME}
   segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
   detector_onnxruntime.h detector_onnxruntime.cpp
   segmentor_onnxruntime.h segmentor_onnxruntime.cpp
+  detector_tensorrt_end2end.h detector_tensorrt_end2end.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
-# ----------------- OpenCV  ------------------#
-
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-
-# ----------------- Checking CUDA ------------------#
+# ----------------- CUDA ------------------#
+message("***** CUDA")
 
 find_package(CUDA)
 if(CUDA_FOUND)
-    message("********** CUDA founded")
+    message("********** CUDA " ${CUDA_VERSION} " founded in: " ${CUDA_INCLUDE_DIRS})
     ADD_DEFINITIONS( -DCUDA_STATUS=true )
+    target_include_directories(${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${CUDA_LIBRARIES})
 else()
     message("********** CUDA not founded")
     ADD_DEFINITIONS( -DCUDA_STATUS=false )
@@ -44,7 +42,16 @@ endif(CUDA_FOUND)
 # Force to use CPU
 #ADD_DEFINITIONS( -DCUDA_STATUS=false )
 
+# ----------------- OpenCV  ------------------#
+message("***** OpenCV")
+
+find_package(OpenCV REQUIRED)
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+message("********** OpenCV " ${OpenCV_VERSION} " founded in: " ${OpenCV_INCLUDE_DIRS})
+
 # ----------------- ONNXRUNTIME  ------------------#
+message("***** ONNXRUNTIME")
 
 if (WIN32)
     message("********** Fix ONNXRUNTIME libraries path")
@@ -61,6 +68,13 @@ if (UNIX)
 endif(UNIX)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${ONNXRUNTIME_DIR}/include")
+
+# ----------------- TensorRT  ------------------#
+message("***** TensorRT")
+
+target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer.so")
+target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so")
+#target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-11.6/targets/x86_64-linux/lib/libcudart.so")
 
 # --------------------------------------------#
 

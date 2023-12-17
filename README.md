@@ -1,46 +1,34 @@
 # YOLOv8
 YOLOv8 detection and segmentation sample in C++  
+
 #
-### YOLOv8 Detection OpenCV DNN
-Detection based on "OpenCV DNN".  
------ Only need to OpenCV  
------ Output contains:  
----------- Detected object ClassID(int)  
----------- Detected object Confidence(float)  
----------- Detected object box(cv::Rect)  
-TODO: Working on batchSize > 1  
-### YOLOv8 Detection ONNX Runtime
-Detection based on "ONNX Runtime".  
------ Only need to OpenCV and ONNX Runtime  
----------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
------ Output contains:  
----------- Detected object ClassID(int)  
----------- Detected object Confidence(float)  
----------- Detected object box(cv::Rect)  
-TODO: Working on batchSize > 1  
+Build OpenCV: https://github.com/younes-mirinezhad/Scrips/tree/main/OpenCV  
+Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
+Download TensorRT: https://developer.nvidia.com/tensorrt-download  
+convert ONNX to TensorRT: trtexec --onnx=model.onnx --saveEngine=engine.trt  
+
 #
-### YOLOv8 Segmentation OpenCV DNN
-Segmentation based on "OpenCV DNN".  
------ Only need to OpenCV  
------ Output contains:  
+## Detection  
+----- Based on OpenCV DNN  
+----- Based on ONNX Runtime  
+
+----- Output:  
 ---------- Detected object ClassID(int)  
 ---------- Detected object Confidence(float)  
 ---------- Detected object box(cv::Rect)  
----------- Mask of detected box(cv::Mat)  
----------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
-TODO: Working on batchSize > 1  
-### YOLOv8 Segmentation ONNX Runtime
-Segmentation based on "ONNX Runtime".  
------ Only need to OpenCV and ONNX Runtime  
----------- Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
------ Output contains:  
+## Segmentation  
+----- Based on OpenCV DNN  
+----- Based on ONNX Runtime  
+
+----- Output:  
 ---------- Detected object ClassID(int)  
 ---------- Detected object Confidence(float)  
 ---------- Detected object box(cv::Rect)  
 ---------- Mask of detected box(cv::Mat)  
 ---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
+
+#
 TODO: Working on batchSize > 1  
-#
-#
+
 ### References
 1: <a href="https://github.com/UNeedCryDear/yolov8-opencv-onnxruntime-cpp">yolov8-opencv-onnxruntime-cpp</a>
