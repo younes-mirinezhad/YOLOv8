@@ -5,7 +5,7 @@
 #include "segmentor_opencv_dnn.h"
 #include "detector_onnxruntime.h"
 #include "segmentor_onnxruntime.h"
-#include "detector_tensorrt.h"
+#include "detector_tensorrt_end2end.h"
 
 void detectorFunc(Detector *detector, std::vector<cv::Mat> imgList, std::vector<std::string> _classNamesList)
 {
@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
 
     //--------------------------------------------------Detector
     {
-        Detector *detector{nullptr}; // Detector_OpenCV_DNN Or Detector_ONNXRUNTIME Or Detector_TensorRT
-        detector = new Detector_TensorRT;
+        Detector *detector{nullptr}; // Detector_OpenCV_DNN Or Detector_ONNXRUNTIME Or Detector_TensorRT_End2End
+        detector = new Detector_TensorRT_End2End;
 
         QString detectorModelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
         auto detectorStatus = detector->LoadModel(detectorModelPath);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
     //--------------------------------------------------Segmentor
     {
-//        Segmentor *segmentor{nullptr}; // Or Segmentor_ONNXRUNTIME Or Segmentor_ONNXRUNTIME Or Segmentor_TensorRT
+//        Segmentor *segmentor{nullptr}; // Or Segmentor_ONNXRUNTIME Or Segmentor_ONNXRUNTIME
 //        segmentor = new Segmentor_OpenCV_DNN;
 
 //        QString segmentorModelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m-seg.onnx";
