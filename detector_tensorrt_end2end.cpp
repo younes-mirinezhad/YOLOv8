@@ -51,8 +51,6 @@ Detector_TensorRT_End2End::Detector_TensorRT_End2End(QObject *parent) : Detector
 Detector_TensorRT_End2End::~Detector_TensorRT_End2End()
 {
     context->destroy();
-    engine->destroy();
-    runtime->destroy();
     cudaStreamDestroy(stream);
     for (auto& ptr : device_ptrs) {
         CHECK(cudaFree(ptr));
@@ -76,10 +74,13 @@ bool Detector_TensorRT_End2End::LoadModel(QString &modelPath)
     assert(trtModelStream);
     file.read(trtModelStream, size);
     file.close();
+    Logger gLogger{nvinfer1::ILogger::Severity::kERROR};
     initLibNvInferPlugins(&gLogger, "");
+    nvinfer1::IRuntime* runtime = nullptr;
     runtime = nvinfer1::createInferRuntime(gLogger);
     assert(runtime != nullptr);
 
+    nvinfer1::ICudaEngine* engine  = nullptr;
     engine = runtime->deserializeCudaEngine(trtModelStream, size);
     assert(engine != nullptr);
     delete[] trtModelStream;
@@ -87,7 +88,7 @@ bool Detector_TensorRT_End2End::LoadModel(QString &modelPath)
 
     assert(context != nullptr);
     cudaStreamCreate(&stream);
-    num_bindings = engine->getNbBindings();
+    int num_bindings = engine->getNbBindings();
 
     for (int i = 0; i < num_bindings; ++i) {
         Binding            binding;

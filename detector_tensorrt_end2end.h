@@ -21,10 +21,7 @@ class Logger: public nvinfer1::ILogger {
 public:
     nvinfer1::ILogger::Severity reportableSeverity;
 
-    explicit Logger(nvinfer1::ILogger::Severity severity = nvinfer1::ILogger::Severity::kINFO):
-        reportableSeverity(severity)
-    {
-    }
+    explicit Logger(nvinfer1::ILogger::Severity severity = nvinfer1::ILogger::Severity::kINFO): reportableSeverity(severity) { }
 
     void log(nvinfer1::ILogger::Severity severity, const char* msg) noexcept override
     {
@@ -67,12 +64,8 @@ private:
     void letterbox(const cv::Mat& image, cv::Mat& out, cv::Size& size);
     ImagesDetectedObject postprocess();
 
-    Logger gLogger{nvinfer1::ILogger::Severity::kERROR};
-    nvinfer1::IRuntime* runtime = nullptr;
-    nvinfer1::ICudaEngine* engine  = nullptr;
     nvinfer1::IExecutionContext* context = nullptr;
     cudaStream_t stream  = nullptr;
-    int num_bindings;
     int num_inputs = 0;
     std::vector<Binding> input_bindings;
     std::vector<Binding> output_bindings;
