@@ -4,13 +4,13 @@ YOLOv8 detection and segmentation sample in C++
 #
 Build OpenCV: https://github.com/younes-mirinezhad/Scrips/tree/main/OpenCV  
 Download ONNX Runtime: https://github.com/microsoft/onnxruntime  
-Download TensorRT: https://developer.nvidia.com/tensorrt-download  
-convert ONNX to TensorRT: trtexec --onnx=model.onnx --saveEngine=engine.trt  
+Install TensorRT: https://github.com/younes-mirinezhad/Scrips/tree/main/TensorRT  
 
 #
 ## Detection  
 ----- Based on OpenCV DNN  
 ----- Based on ONNX Runtime  
+----- Based on TensorRT  
 
 ----- Output:  
 ---------- Detected object ClassID(int)  
@@ -31,4 +31,5 @@ convert ONNX to TensorRT: trtexec --onnx=model.onnx --saveEngine=engine.trt
 TODO: Working on batchSize > 1  
 
 ### References
-1: <a href="https://github.com/UNeedCryDear/yolov8-opencv-onnxruntime-cpp">yolov8-opencv-onnxruntime-cpp</a>
+1: <a href="https://github.com/UNeedCryDear/yolov8-opencv-onnxruntime-cpp">Github: UNeedCryDear</a>
+1: <a href="https://github.com/triple-Mu/YOLOv8-TensorRT">Github: triple-Mu</a>

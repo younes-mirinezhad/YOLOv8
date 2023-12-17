@@ -47,7 +47,6 @@ inline static float clamp(float val, float min, float max)
 Detector_TensorRT_End2End::Detector_TensorRT_End2End(QObject *parent) : Detector{parent} {
     qDebug() << Q_FUNC_INFO;
 }
-
 Detector_TensorRT_End2End::~Detector_TensorRT_End2End()
 {
     context->destroy();

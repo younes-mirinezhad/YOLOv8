@@ -1,7 +1,8 @@
 #pragma once
 
 #include "detector.h"
-#include "NvInfer.h"
+#include <NvInferRuntime.h>
+#include <NvInferRuntimeBase.h>
 
 struct Binding {
     size_t size = 1;
