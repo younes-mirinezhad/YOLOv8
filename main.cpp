@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
         Detector *detector{nullptr}; // Detector_OpenCV_DNN Or Detector_ONNXRUNTIME Or Detector_TensorRT_End2End
         detector = new Detector_TensorRT_End2End;
 
-        QString detectorModelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
+//        QString detectorModelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
+        QString detectorModelPath = "/home/chiko/Downloads/Compressed/yolov8m.engine";
         auto detectorStatus = detector->LoadModel(detectorModelPath);
         if(!detectorStatus)
             return{};
