@@ -50,15 +50,15 @@ Detector_TensorRT_End2End::Detector_TensorRT_End2End(QObject *parent) : Detector
 
 Detector_TensorRT_End2End::~Detector_TensorRT_End2End()
 {
-    this->context->destroy();
-    this->engine->destroy();
-    this->runtime->destroy();
-    cudaStreamDestroy(this->stream);
-    for (auto& ptr : this->device_ptrs) {
+    context->destroy();
+    engine->destroy();
+    runtime->destroy();
+    cudaStreamDestroy(stream);
+    for (auto& ptr : device_ptrs) {
         CHECK(cudaFree(ptr));
     }
 
-    for (auto& ptr : this->host_ptrs) {
+    for (auto& ptr : host_ptrs) {
         CHECK(cudaFreeHost(ptr));
     }
 }
@@ -76,59 +76,59 @@ bool Detector_TensorRT_End2End::LoadModel(QString &modelPath)
     assert(trtModelStream);
     file.read(trtModelStream, size);
     file.close();
-    initLibNvInferPlugins(&this->gLogger, "");
-    this->runtime = nvinfer1::createInferRuntime(this->gLogger);
-    assert(this->runtime != nullptr);
+    initLibNvInferPlugins(&gLogger, "");
+    runtime = nvinfer1::createInferRuntime(gLogger);
+    assert(runtime != nullptr);
 
-    this->engine = this->runtime->deserializeCudaEngine(trtModelStream, size);
-    assert(this->engine != nullptr);
+    engine = runtime->deserializeCudaEngine(trtModelStream, size);
+    assert(engine != nullptr);
     delete[] trtModelStream;
-    this->context = this->engine->createExecutionContext();
+    context = engine->createExecutionContext();
 
-    assert(this->context != nullptr);
-    cudaStreamCreate(&this->stream);
-    this->num_bindings = this->engine->getNbBindings();
+    assert(context != nullptr);
+    cudaStreamCreate(&stream);
+    num_bindings = engine->getNbBindings();
 
-    for (int i = 0; i < this->num_bindings; ++i) {
+    for (int i = 0; i < num_bindings; ++i) {
         Binding            binding;
         nvinfer1::Dims     dims;
-        nvinfer1::DataType dtype = this->engine->getBindingDataType(i);
-        std::string        name  = this->engine->getBindingName(i);
+        nvinfer1::DataType dtype = engine->getBindingDataType(i);
+        std::string        name  = engine->getBindingName(i);
         binding.name             = name;
         binding.dsize            = type_to_size(dtype);
 
         bool IsInput = engine->bindingIsInput(i);
         if (IsInput) {
-            this->num_inputs += 1;
-            dims         = this->engine->getProfileDimensions(i, 0, nvinfer1::OptProfileSelector::kMAX);
+            num_inputs += 1;
+            dims         = engine->getProfileDimensions(i, 0, nvinfer1::OptProfileSelector::kMAX);
             binding.size = get_size_by_dims(dims);
             binding.dims = dims;
-            this->input_bindings.push_back(binding);
+            input_bindings.push_back(binding);
             // set max opt shape
-            this->context->setBindingDimensions(i, dims);
+            context->setBindingDimensions(i, dims);
         }
         else {
-            dims         = this->context->getBindingDimensions(i);
+            dims         = context->getBindingDimensions(i);
             binding.size = get_size_by_dims(dims);
             binding.dims = dims;
-            this->output_bindings.push_back(binding);
-            this->num_outputs += 1;
+            output_bindings.push_back(binding);
+            num_outputs += 1;
         }
     }
     // make_pipe
-    for (auto& bindings : this->input_bindings) {
+    for (auto& bindings : input_bindings) {
         void* d_ptr;
-        CHECK(cudaMallocAsync(&d_ptr, bindings.size * bindings.dsize, this->stream));
-        this->device_ptrs.push_back(d_ptr);
+        CHECK(cudaMallocAsync(&d_ptr, bindings.size * bindings.dsize, stream));
+        device_ptrs.push_back(d_ptr);
     }
 
-    for (auto& bindings : this->output_bindings) {
+    for (auto& bindings : output_bindings) {
         void * d_ptr, *h_ptr;
         size_t size = bindings.size * bindings.dsize;
-        CHECK(cudaMallocAsync(&d_ptr, size, this->stream));
+        CHECK(cudaMallocAsync(&d_ptr, size, stream));
         CHECK(cudaHostAlloc(&h_ptr, size, 0));
-        this->device_ptrs.push_back(d_ptr);
-        this->host_ptrs.push_back(h_ptr);
+        device_ptrs.push_back(d_ptr);
+        host_ptrs.push_back(h_ptr);
     }
 
     return true;
@@ -151,12 +151,12 @@ BatchDetectedObject Detector_TensorRT_End2End::Run(MatVector &srcImgList)
 
     copy_from_Mat(srcImg, _inputSize);
 
-    this->context->enqueueV2(this->device_ptrs.data(), this->stream, nullptr);
-    for (int i = 0; i < this->num_outputs; i++) {
-        size_t osize = this->output_bindings[i].size * this->output_bindings[i].dsize;
-        CHECK(cudaMemcpyAsync(this->host_ptrs[i], this->device_ptrs[i + this->num_inputs], osize, cudaMemcpyDeviceToHost, this->stream));
+    context->enqueueV2(device_ptrs.data(), stream, nullptr);
+    for (int i = 0; i < num_outputs; i++) {
+        size_t osize = output_bindings[i].size * output_bindings[i].dsize;
+        CHECK(cudaMemcpyAsync(host_ptrs[i], device_ptrs[i + num_inputs], osize, cudaMemcpyDeviceToHost, stream));
     }
-    cudaStreamSynchronize(this->stream);
+    cudaStreamSynchronize(stream);
 
     imageOutput = postprocess();
 
@@ -167,24 +167,24 @@ BatchDetectedObject Detector_TensorRT_End2End::Run(MatVector &srcImgList)
 void Detector_TensorRT_End2End::copy_from_Mat(const cv::Mat &image)
 {
     cv::Mat  nchw;
-    auto&    in_binding = this->input_bindings[0];
+    auto&    in_binding = input_bindings[0];
     auto     width      = in_binding.dims.d[3];
     auto     height     = in_binding.dims.d[2];
     cv::Size size{width, height};
-    this->letterbox(image, nchw, size);
+    letterbox(image, nchw, size);
 
-    this->context->setBindingDimensions(0, nvinfer1::Dims{4, {1, 3, height, width}});
+    context->setBindingDimensions(0, nvinfer1::Dims{4, {1, 3, height, width}});
 
     CHECK(cudaMemcpyAsync(
-        this->device_ptrs[0], nchw.ptr<float>(), nchw.total() * nchw.elemSize(), cudaMemcpyHostToDevice, this->stream));
+        device_ptrs[0], nchw.ptr<float>(), nchw.total() * nchw.elemSize(), cudaMemcpyHostToDevice, stream));
 }
 void Detector_TensorRT_End2End::copy_from_Mat(const cv::Mat &image, cv::Size &size)
 {
     cv::Mat nchw;
-    this->letterbox(image, nchw, size);
-    this->context->setBindingDimensions(0, nvinfer1::Dims{4, {1, 3, size.height, size.width}});
+    letterbox(image, nchw, size);
+    context->setBindingDimensions(0, nvinfer1::Dims{4, {1, 3, size.height, size.width}});
     CHECK(cudaMemcpyAsync(
-        this->device_ptrs[0], nchw.ptr<float>(), nchw.total() * nchw.elemSize(), cudaMemcpyHostToDevice, this->stream));
+        device_ptrs[0], nchw.ptr<float>(), nchw.total() * nchw.elemSize(), cudaMemcpyHostToDevice, stream));
 }
 void Detector_TensorRT_End2End::letterbox(const cv::Mat &image, cv::Mat &out, cv::Size &size)
 {
@@ -218,25 +218,25 @@ void Detector_TensorRT_End2End::letterbox(const cv::Mat &image, cv::Mat &out, cv
     cv::copyMakeBorder(tmp, tmp, top, bottom, left, right, cv::BORDER_CONSTANT, {114, 114, 114});
 
     cv::dnn::blobFromImage(tmp, out, 1 / 255.f, cv::Size(), cv::Scalar(0, 0, 0), true, false, CV_32F);
-    this->pparam.ratio  = 1 / r;
-    this->pparam.dw     = dw;
-    this->pparam.dh     = dh;
-    this->pparam.height = height;
-    this->pparam.width  = width;
+    pparam.ratio  = 1 / r;
+    pparam.dw     = dw;
+    pparam.dh     = dh;
+    pparam.height = height;
+    pparam.width  = width;
 }
 ImagesDetectedObject Detector_TensorRT_End2End::postprocess()
 {
     ImagesDetectedObject imageOutput;
 
-    int*  num_dets = static_cast<int*>(this->host_ptrs[0]);
-    auto* boxes    = static_cast<float*>(this->host_ptrs[1]);
-    auto* scores   = static_cast<float*>(this->host_ptrs[2]);
-    int*  labels   = static_cast<int*>(this->host_ptrs[3]);
-    auto& dw       = this->pparam.dw;
-    auto& dh       = this->pparam.dh;
-    auto& width    = this->pparam.width;
-    auto& height   = this->pparam.height;
-    auto& ratio    = this->pparam.ratio;
+    int*  num_dets = static_cast<int*>(host_ptrs[0]);
+    auto* boxes    = static_cast<float*>(host_ptrs[1]);
+    auto* scores   = static_cast<float*>(host_ptrs[2]);
+    int*  labels   = static_cast<int*>(host_ptrs[3]);
+    auto& dw       = pparam.dw;
+    auto& dh       = pparam.dh;
+    auto& width    = pparam.width;
+    auto& height   = pparam.height;
+    auto& ratio    = pparam.ratio;
     for (int i = 0; i < num_dets[0]; i++) {
         float* ptr = boxes + i * 4;
 
