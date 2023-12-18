@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         detector = new Detector_TensorRT_End2End;
 
 //        QString detectorModelPath = "/media/chiko/HDD_1/Work/Training_Scripts/YOLOv8/yolov8m.onnx";
-        QString detectorModelPath = "/home/chiko/Downloads/Compressed/yolov8m.engine";
+        QString detectorModelPath = "/home/chiko/Downloads/Compressed/yolov8n.engine";
         auto detectorStatus = detector->LoadModel(detectorModelPath);
         if(!detectorStatus)
             return{};

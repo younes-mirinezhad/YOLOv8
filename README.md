@@ -30,6 +30,3 @@ Install TensorRT: https://github.com/younes-mirinezhad/Scrips/tree/main/TensorRT
 #
 TODO: Working on batchSize > 1  
 
-### References
-1: <a href="https://github.com/UNeedCryDear/yolov8-opencv-onnxruntime-cpp">Github: UNeedCryDear</a>
-1: <a href="https://github.com/triple-Mu/YOLOv8-TensorRT">Github: triple-Mu</a>
