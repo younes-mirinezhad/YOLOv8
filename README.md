@@ -16,6 +16,8 @@ Install TensorRT: https://github.com/younes-mirinezhad/Scrips/tree/main/TensorRT
 ---------- Detected object ClassID(int)  
 ---------- Detected object Confidence(float)  
 ---------- Detected object box(cv::Rect)  
+
+#
 ## Segmentation  
 ----- Based on OpenCV DNN  
 ----- Based on ONNX Runtime  
@@ -28,5 +30,6 @@ Install TensorRT: https://github.com/younes-mirinezhad/Scrips/tree/main/TensorRT
 ---------- Contours of detected mask(std::vector<std::vector<cv::Point>>)  
 
 #
-TODO: Working on batchSize > 1  
+## Train and export models  
+https://github.com/younes-mirinezhad/YOLOv8/tree/main/Training  
 
