@@ -1,14 +1,14 @@
-#pragma once
+#ifndef DETECTOR_TENSORRT_H
+#define DETECTOR_TENSORRT_H
 
 #include "detector.h"
 #include <NvInferRuntime.h>
-#include <NvInferRuntimeBase.h>
 
 struct Binding {
     size_t size = 1;
     size_t dsize = 1;
     nvinfer1::Dims dims;
-    std::string name;
+    char* name;
 };
 struct PreParam {
     float ratio  = 1.0f;
@@ -50,29 +50,33 @@ public:
     }
 };
 
-class Detector_TensorRT_End2End : public Detector
+class Detector_TensorRT : public Detector
 {
 public:
-    explicit Detector_TensorRT_End2End(QObject *parent = nullptr);
-    ~Detector_TensorRT_End2End();
+    explicit Detector_TensorRT(QObject *parent = nullptr);
+    ~Detector_TensorRT();
 
-    bool LoadModel(QString& modelPath) override;
-    BatchDetectedObject Run(MatVector& srcImgList) override;
+    bool LoadModel(QString &modelPath) override;
+    ImagesDetectedObject detect(cv::Mat &srcImg) override;
+    ImagesDetectedObject detect(cv::cuda::GpuMat &srcImg) override;
 
 private:
-    void copy_from_Mat(const cv::Mat& image);
-    void copy_from_Mat(const cv::Mat& image, cv::Size& size);
-    void letterbox(const cv::Mat& image, cv::Mat& out, cv::Size& size);
+    void copy_from_Mat(cv::Mat &img, cv::Size &size);
+    void letterbox(cv::Mat &img_input, cv::Size &size);
+    void copy_from_Mat(cv::cuda::GpuMat &gImg, cv::Size &size);
+    void letterbox(cv::cuda::GpuMat& gImg_input, cv::Size &size);
+    void blobFromGpuMat(const cv::cuda::GpuMat& gImg_input, const std::array<float, 3>& std,
+                        const std::array<float, 3>& mean, bool swapBR, bool normalize);
     ImagesDetectedObject postprocess();
 
-    nvinfer1::IExecutionContext* context = nullptr;
-    cudaStream_t stream  = nullptr;
-    int num_inputs = 0;
-    std::vector<Binding> input_bindings;
-    std::vector<Binding> output_bindings;
-    int num_outputs = 0;
-    std::vector<void*> device_ptrs;
-    std::vector<void*> host_ptrs;
+    nvinfer1::IExecutionContext* context{nullptr};
+    cudaStream_t stream{nullptr};
+    int num_inputs{0}, num_outputs{0};
+    std::vector<Binding> input_bindings, output_bindings;
+    std::vector<void*> device_ptrs, host_ptrs;
     PreParam pparam;
+    cv::cuda::GpuMat _gBlob;
+    cv::Mat _blob;
 };
 
+#endif // DETECTOR_TENSORRT_H

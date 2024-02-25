@@ -3,28 +3,25 @@
 #include <opencv2/opencv.hpp>
 #include <QDebug>
 
-using MatVector = std::vector<cv::Mat>;
 struct DetectedObject {
     int classID;
+    std::string className;
     float confidence;
     cv::Rect box;
 };
 using ImagesDetectedObject = std::vector<DetectedObject>;
-using BatchDetectedObject = std::vector<ImagesDetectedObject>;
 class Detector : public QObject
 {
 public:
     explicit Detector(QObject *parent = nullptr);
 
-    virtual bool LoadModel(QString& modelPath) = 0;
-    virtual BatchDetectedObject Run(MatVector& srcImgList) = 0;
+    virtual bool LoadModel(QString &modelPath) = 0;
+    virtual ImagesDetectedObject detect(cv::Mat &srcImg) = 0;
+    virtual ImagesDetectedObject detect(cv::cuda::GpuMat &srcImg) = 0;
 
     std::vector<std::string> _classNamesList;
     void setClassNames(std::vector<std::string> newClassNamesList);
 
-    int _batchSize = 1;
-    void setBatchSize(int newBatch);
-
-    cv::Size _inputSize = cv::Size(640, 640);
+    cv::Size _inputSize = cv::Size(960, 960);
     void setInputSize(cv::Size newInputSize);
 };

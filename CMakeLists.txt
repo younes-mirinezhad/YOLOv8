@@ -15,32 +15,30 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 add_executable(${PROJECT_NAME}
   main.cpp
+  processingthread.h processingthread.cpp
+
   detector.h detector.cpp
-  segmentor.h segmentor.cpp
-  detector_opencv_dnn.h detector_opencv_dnn.cpp
-  segmentor_opencv_dnn.h segmentor_opencv_dnn.cpp
-  detector_onnxruntime.h detector_onnxruntime.cpp
-  segmentor_onnxruntime.h segmentor_onnxruntime.cpp
-  detector_tensorrt_end2end.h detector_tensorrt_end2end.cpp
+  detector_tensorrt.h detector_tensorrt.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
 # ----------------- CUDA ------------------#
 message("***** CUDA")
 
+SET(CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+set(CMAKE_CUDA_ARCHITECTURES 60 61 62 70 72 75 86)
+if (NOT CMAKE_CUDA_COMPILER)
+    set(CMAKE_CUDA_COMPILER  ${CUDA_COMPILER})
+endif()
+
 find_package(CUDA)
 if(CUDA_FOUND)
     message("********** CUDA " ${CUDA_VERSION} " founded in: " ${CUDA_INCLUDE_DIRS})
-    ADD_DEFINITIONS( -DCUDA_STATUS=true )
     target_include_directories(${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${CUDA_LIBRARIES})
 else()
     message("********** CUDA not founded")
-    ADD_DEFINITIONS( -DCUDA_STATUS=false )
 endif(CUDA_FOUND)
-
-# Force to use CPU
-#ADD_DEFINITIONS( -DCUDA_STATUS=false )
 
 # ----------------- OpenCV  ------------------#
 message("***** OpenCV")
@@ -50,31 +48,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 message("********** OpenCV " ${OpenCV_VERSION} " founded in: " ${OpenCV_INCLUDE_DIRS})
 
-# ----------------- ONNXRUNTIME  ------------------#
-message("***** ONNXRUNTIME")
-
-if (WIN32)
-    message("********** Fix ONNXRUNTIME libraries path")
-endif(WIN32)
-
-if (UNIX)
-    if(CUDA_FOUND)
-        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-gpu-1.16.2)
-    else()
-        SET (ONNXRUNTIME_DIR /media/chiko/HDD_1/Software/Ubuntu/ONNX_RUNTIME/onnxruntime-linux-x64-1.16.2)
-    endif(CUDA_FOUND)
-
-    target_link_libraries(${PROJECT_NAME} "${ONNXRUNTIME_DIR}/lib/libonnxruntime.so")
-endif(UNIX)
-
-target_include_directories(${PROJECT_NAME} PRIVATE "${ONNXRUNTIME_DIR}/include")
-
 # ----------------- TensorRT  ------------------#
 message("***** TensorRT")
 
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer.so")
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so")
-#target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-11.6/targets/x86_64-linux/lib/libcudart.so")
+target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-11.6/targets/x86_64-linux/lib/libcudart.so")
 
 # --------------------------------------------#
 
