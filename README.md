@@ -1,5 +1,5 @@
 # YOLOv8
-YOLOv8 detection sample in C++  
+YOLOv8 samples  
 
 #
 Build OpenCV: https://github.com/younes-mirinezhad/Scrips/tree/main/OpenCV  

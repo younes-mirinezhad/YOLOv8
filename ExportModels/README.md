@@ -1,5 +1,5 @@
 # YOLOv8
-YOLOv8 detection and segmentation sample training script in python  
+Export models in python  
 #
 ### install ultralytics
 pip install ultralytics  
