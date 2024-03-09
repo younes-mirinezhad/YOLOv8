@@ -16,9 +16,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 add_executable(${PROJECT_NAME}
   main.cpp
   processingthread.h processingthread.cpp
-
   detector.h detector.cpp
   detector_tensorrt.h detector_tensorrt.cpp
+  detector_opencv_dnn.h detector_opencv_dnn.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
@@ -34,10 +34,12 @@ endif()
 find_package(CUDA)
 if(CUDA_FOUND)
     message("********** CUDA " ${CUDA_VERSION} " founded in: " ${CUDA_INCLUDE_DIRS})
+    ADD_DEFINITIONS( -DCUDA_STATUS=true )
     target_include_directories(${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${CUDA_LIBRARIES})
 else()
-    message("********** CUDA not founded")
+    message("********** ERROR: CUDA not founded")
+    ADD_DEFINITIONS( -DCUDA_STATUS=false )
 endif(CUDA_FOUND)
 
 # ----------------- OpenCV  ------------------#
@@ -53,7 +55,7 @@ message("***** TensorRT")
 
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer.so")
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so")
-target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-11.6/targets/x86_64-linux/lib/libcudart.so")
+target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-12.1/targets/x86_64-linux/lib/libcudart.so")
 
 # --------------------------------------------#
 

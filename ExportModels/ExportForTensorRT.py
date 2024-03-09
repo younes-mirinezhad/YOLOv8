@@ -16,7 +16,7 @@ import numpy as np
 import os
 
 def main():
-    weight_pt = "/home/chiko/Downloads/Compressed/yolov8n.pt" # PyTorch yolov8 weights
+    weight_pt = "path/to/model.pt" # PyTorch yolov8 weights
     weight_ONNX = weight_pt.replace(".pt", "_end2end.onnx") # ONNX yolov8 weights
     device = "cuda:0" # cpu , cuda:0 --> Export device
     input_shape = [1, 3, 960, 960] # Model input shape only for api builder

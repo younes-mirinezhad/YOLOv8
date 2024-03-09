@@ -1,26 +1,18 @@
 #include "processingthread.h"
 #include "qdebug.h"
-#include "detector.h"
-#include "detector_tensorrt.h"
 
 ProcessingThread::ProcessingThread() {}
-
-bool ProcessingThread::loadDetector(QString detectorModelPath, cv::Size inputSize, std::vector<std::string> classNamesList)
-{
-    _detector = new Detector_TensorRT;
-    _detector->setClassNames(classNamesList);
-    _detector->setInputSize(inputSize);
-
-    auto detectorStatus = _detector->LoadModel(detectorModelPath);
-
-    return detectorStatus;
-}
 
 void ProcessingThread::setDetector(Detector *newDetector)
 {
     qDebug() << Q_FUNC_INFO;
 
     _detector = newDetector;
+}
+
+void ProcessingThread::setImagePath(std::string newPath)
+{
+    _imgPath = newPath;
 }
 
 void ProcessingThread::startProcess()
@@ -40,7 +32,6 @@ void ProcessingThread::stopProcess()
 void ProcessingThread::run()
 {
     qDebug() << Q_FUNC_INFO;
-    auto _imgPath = "/media/chiko/HDD_1/Work/Training_Scripts/CocoImage/img.jpeg";
 
     while (_running) {
         if(_process) {
@@ -49,16 +40,17 @@ void ProcessingThread::run()
             auto img = cv::imread(_imgPath);
 
             // Use cv::Mat
-            // _result = _detector->detect(img);
+            _result = _detector->detect(img);
 
             // Use cv::cuda::GpuMat
-            cv::cuda::GpuMat gImg;
-            gImg.upload(img);
-            _result = _detector->detect(gImg);
+            // cv::cuda::GpuMat gImg;
+            // gImg.upload(img);
+            // _result = _detector->detect(gImg);
 
             auto Current_time = std::chrono::high_resolution_clock::now();
-            auto Elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(Current_time - Start_time).count();
-            qDebug() << "----- Detection time:" << Elapsed_time;
+            auto Elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(Current_time - Start_time).count();
+            auto dt = double(Elapsed_time / 100)/10;
+            qDebug() << "----- Detection time:" << dt;
 
             _process = 0;
         }

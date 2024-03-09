@@ -9,10 +9,11 @@ class ProcessingThread : public QThread
 public:
     ProcessingThread();
 
-    bool loadDetector(QString detectorModelPath, cv::Size inputSize, std::vector<std::string> classNamesList);
-
     void setDetector(Detector *newDetector);
     Detector *_detector{nullptr};
+
+    void setImagePath(std::string newPath);
+    std::string _imgPath{};
 
     void startProcess();
     void stopProcess();
