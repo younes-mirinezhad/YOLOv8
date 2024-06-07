@@ -31,8 +31,6 @@ def main():
     seg = False # Build seg model by onnx
     fp16 = True # Build model with fp16 mode
     Engine_Export(weight_ONNX, device, seg, fp16, input_shape, iou_thres, conf_thres, topk)
-    
-    os.remove(weight_ONNX)
 
 def ONNX_Export(weight_pt, weight_ONNX, device, input_shape, opset, topk, sim, conf_thres, iou_thres):
     PostDetect.conf_thres = conf_thres

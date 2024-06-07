@@ -1,0 +1,3 @@
+[submodule "TensorRT_EngineBuilder/thirdParty/spdlog"]
+	path = TensorRT_EngineBuilder/thirdParty/spdlog
+	url = https://github.com/gabime/spdlog.git
