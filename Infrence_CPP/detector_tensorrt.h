@@ -18,36 +18,13 @@ struct PreParam {
     float width  = 0;
 };
 
-class Logger: public nvinfer1::ILogger {
+using Severity = nvinfer1::ILogger::Severity;
+class TrtLogger : public nvinfer1::ILogger {
 public:
-    nvinfer1::ILogger::Severity reportableSeverity;
-
-    explicit Logger(nvinfer1::ILogger::Severity severity = nvinfer1::ILogger::Severity::kINFO): reportableSeverity(severity) { }
-
-    void log(nvinfer1::ILogger::Severity severity, const char* msg) noexcept override
-    {
-        if (severity > reportableSeverity) {
-            return;
-        }
-        switch (severity) {
-        case nvinfer1::ILogger::Severity::kINTERNAL_ERROR:
-            std::cerr << "INTERNAL_ERROR: ";
-            break;
-        case nvinfer1::ILogger::Severity::kERROR:
-            std::cerr << "ERROR: ";
-            break;
-        case nvinfer1::ILogger::Severity::kWARNING:
-            std::cerr << "WARNING: ";
-            break;
-        case nvinfer1::ILogger::Severity::kINFO:
-            std::cerr << "INFO: ";
-            break;
-        default:
-            std::cerr << "VERBOSE: ";
-            break;
-        }
-        std::cerr << msg << std::endl;
-    }
+    void setLogSeverity(Severity severity);
+private:
+    void log(Severity severity, const char *msg) noexcept override;
+    Severity m_severity = Severity::kINFO;
 };
 
 class Detector_TensorRT : public Detector
@@ -56,27 +33,30 @@ public:
     explicit Detector_TensorRT(QObject *parent = nullptr);
     ~Detector_TensorRT();
 
-    bool LoadModel(QString &modelPath) override;
-    ImagesDetectedObject detect(cv::Mat &srcImg) override;
-    ImagesDetectedObject detect(cv::cuda::GpuMat &srcImg) override;
+    bool LoadModel(std::string &modelPath) override;
+    Frames_Detection detect(cv::Mat &srcImg) override;
+    Frames_Detection detect(cv::cuda::GpuMat &srcImg) override;
 
 private:
+    bool _modelIsLoaded{false};
+    nvinfer1::IExecutionContext* context{nullptr};
+    cudaStream_t stream{nullptr};
+    int num_inputs{0};
+    int num_outputs{0};
+    std::vector<Binding> output_bindings;
+    std::vector<void*> device_ptrs;
+    std::vector<void*> host_ptrs;
+    cv::cuda::GpuMat _gBlob;
+    cv::Mat _blob;
     void copy_from_Mat(cv::Mat &img, cv::Size &size);
     void letterbox(cv::Mat &img_input, cv::Size &size);
+    PreParam pparam;
+
     void copy_from_Mat(cv::cuda::GpuMat &gImg, cv::Size &size);
     void letterbox(cv::cuda::GpuMat& gImg_input, cv::Size &size);
     void blobFromGpuMat(const cv::cuda::GpuMat& gImg_input, const std::array<float, 3>& std,
                         const std::array<float, 3>& mean, bool swapBR, bool normalize);
-    ImagesDetectedObject postprocess();
-
-    nvinfer1::IExecutionContext* context{nullptr};
-    cudaStream_t stream{nullptr};
-    int num_inputs{0}, num_outputs{0};
-    std::vector<Binding> input_bindings, output_bindings;
-    std::vector<void*> device_ptrs, host_ptrs;
-    PreParam pparam;
-    cv::cuda::GpuMat _gBlob;
-    cv::Mat _blob;
+    Frames_Detection postprocess();
 };
 
 #endif // DETECTOR_TENSORRT_H

@@ -1,5 +1,5 @@
 #include "detector_tensorrt.h"
-#include "qdebug.h"
+#include "spdlog/spdlog.h"
 #include "fstream"
 #include "NvInferPlugin.h"
 #include <opencv2/cudawarping.hpp>
@@ -43,6 +43,36 @@ inline int get_size_by_dims(const nvinfer1::Dims& dims)
     return size;
 }
 
+void TrtLogger::setLogSeverity(Severity severity)
+{
+    m_severity = severity;
+}
+void TrtLogger::log(Severity severity, const char *msg) noexcept
+{
+    if (severity <= m_severity) {
+        switch (severity) {
+        case Severity::kINTERNAL_ERROR:
+            spdlog::critical("[F] [TRT] {} -----> {}", Q_FUNC_INFO, msg);
+            break;
+        case Severity::kERROR:
+            spdlog::error("[E] [TRT] {} -----> {}", Q_FUNC_INFO, msg);
+            break;
+        case Severity::kWARNING:
+            spdlog::warn("[W] [TRT] {} -----> {}", Q_FUNC_INFO, msg);
+            break;
+        case Severity::kINFO:
+            spdlog::info("[I] [TRT] {} -----> {}", Q_FUNC_INFO, msg);
+            break;
+        case Severity::kVERBOSE:
+            spdlog::info("[V] [TRT] {} -----> {}", Q_FUNC_INFO, msg);
+            break;
+        default:
+            assert(false && "{} -----> invalid log level");
+            break;
+        }
+    }
+}
+
 Detector_TensorRT::Detector_TensorRT(QObject *parent) : Detector{parent} {}
 Detector_TensorRT::~Detector_TensorRT()
 {
@@ -56,11 +86,12 @@ Detector_TensorRT::~Detector_TensorRT()
     }
 }
 
-bool Detector_TensorRT::LoadModel(QString &modelPath)
+bool Detector_TensorRT::LoadModel(std::string &modelPath)
 {
-    qDebug() << Q_FUNC_INFO << modelPath;
+    spdlog::info("{} -----> Loading model: {}", Q_FUNC_INFO, modelPath);
 
-    std::ifstream file(modelPath.toStdString(), std::ios::binary);
+    _modelIsLoaded = false;
+    std::ifstream file(modelPath, std::ios::binary);
     assert(file.good());
     file.seekg(0, std::ios::end);
     auto size = file.tellg();
@@ -69,7 +100,7 @@ bool Detector_TensorRT::LoadModel(QString &modelPath)
     assert(trtModelStream);
     file.read(trtModelStream, size);
     file.close();
-    Logger gLogger{nvinfer1::ILogger::Severity::kERROR};
+    TrtLogger gLogger;
     initLibNvInferPlugins(&gLogger, "");
     nvinfer1::IRuntime* runtime = nullptr;
     runtime = nvinfer1::createInferRuntime(gLogger);
@@ -84,6 +115,8 @@ bool Detector_TensorRT::LoadModel(QString &modelPath)
     assert(context != nullptr);
     CHECK(cudaStreamCreate(&stream));
     int num_bindings = engine->getNbIOTensors();
+
+    std::vector<Binding> input_bindings;
 
     for (int i = 0; i < num_bindings; ++i) {
         Binding binding;
@@ -127,15 +160,16 @@ bool Detector_TensorRT::LoadModel(QString &modelPath)
     }
     CHECK(cudaStreamSynchronize(stream));
 
-    qDebug() << "----- Model loaded:" << modelPath;
+    _modelIsLoaded = true;
+    spdlog::info("{} ----------> Model is loaded.", Q_FUNC_INFO);
 
-    _gBlob = cv::cuda::GpuMat(1, _inputSize.width * _inputSize.height, CV_32FC3);
     _blob = cv::Mat(1, _inputSize.width * _inputSize.height, CV_32FC3);
+    _gBlob = cv::cuda::GpuMat(1, _inputSize.width * _inputSize.height, CV_32FC3);
 
-    return true;
+    return _modelIsLoaded;
 }
 
-ImagesDetectedObject Detector_TensorRT::detect(cv::Mat &srcImg)
+Frames_Detection Detector_TensorRT::detect(cv::Mat &srcImg)
 {
     copy_from_Mat(srcImg, _inputSize);
     context->enqueueV2(device_ptrs.data(), stream, nullptr);
@@ -144,9 +178,9 @@ ImagesDetectedObject Detector_TensorRT::detect(cv::Mat &srcImg)
         CHECK(cudaMemcpyAsync(host_ptrs[i], device_ptrs[i + num_inputs], osize, cudaMemcpyDeviceToHost, stream));
     }
     CHECK(cudaStreamSynchronize(stream));
-    auto resOneShot = postprocess();
+    auto resFrame = postprocess();
 
-    return resOneShot;
+    return resFrame;
 }
 void Detector_TensorRT::copy_from_Mat(cv::Mat &img, cv::Size &size)
 {
@@ -157,12 +191,10 @@ void Detector_TensorRT::copy_from_Mat(cv::Mat &img, cv::Size &size)
 }
 void Detector_TensorRT::letterbox(cv::Mat &img_input, cv::Size &size)
 {
-    const float inp_h = size.height;
-    const float inp_w = size.width;
     float height = img_input.rows;
     float width = img_input.cols;
 
-    float r = std::min(inp_h / height, inp_w / width);
+    float r = std::min(size.height / height, size.width / width);
     int padw = std::round(width * r);
     int padh = std::round(height * r);
 
@@ -170,8 +202,8 @@ void Detector_TensorRT::letterbox(cv::Mat &img_input, cv::Size &size)
         cv::resize(img_input, img_input, cv::Size(padw, padh));
     }
 
-    float dw = inp_w - padw;
-    float dh = inp_h - padh;
+    float dw = size.width - padw;
+    float dh = size.height - padh;
 
     dw /= 2.0f;
     dh /= 2.0f;
@@ -181,8 +213,8 @@ void Detector_TensorRT::letterbox(cv::Mat &img_input, cv::Size &size)
     int right = int(std::round(dw + 0.1f));
 
     cv::copyMakeBorder(img_input, img_input, top, bottom, left, right, cv::BORDER_CONSTANT, {114, 114, 114});
-
     cv::dnn::blobFromImage(img_input, _blob, 1 / 255.f, cv::Size(), cv::Scalar(0, 0, 0), true, false, CV_32F);
+
     pparam.ratio = 1 / r;
     pparam.dw = dw;
     pparam.dh = dh;
@@ -190,7 +222,7 @@ void Detector_TensorRT::letterbox(cv::Mat &img_input, cv::Size &size)
     pparam.width = width;
 }
 
-ImagesDetectedObject Detector_TensorRT::detect(cv::cuda::GpuMat &srcImg)
+Frames_Detection Detector_TensorRT::detect(cv::cuda::GpuMat &srcImg)
 {
     copy_from_Mat(srcImg, _inputSize);
     context->enqueueV2(device_ptrs.data(), stream, nullptr);
@@ -199,26 +231,24 @@ ImagesDetectedObject Detector_TensorRT::detect(cv::cuda::GpuMat &srcImg)
         CHECK(cudaMemcpyAsync(host_ptrs[i], device_ptrs[i + num_inputs], osize, cudaMemcpyDeviceToHost, stream));
     }
     CHECK(cudaStreamSynchronize(stream));
-    auto resOneShot = postprocess();
+    auto resFrame = postprocess();
 
-    return resOneShot;
+    return resFrame;
 }
 void Detector_TensorRT::copy_from_Mat(cv::cuda::GpuMat &gImg, cv::Size &size)
 {
     letterbox(gImg, size);
-
     context->setBindingDimensions(0, nvinfer1::Dims{4, {1, 3, size.height, size.width}});
     int total = _gBlob.rows * _gBlob.cols;
+
     CHECK(cudaMemcpyAsync(device_ptrs[0], _gBlob.ptr<float>(), total * _gBlob.elemSize(), cudaMemcpyHostToDevice, stream));
 }
 void Detector_TensorRT::letterbox(cv::cuda::GpuMat &gImg_input, cv::Size &size)
 {
-    const float inp_h = size.height;
-    const float inp_w = size.width;
     float height = gImg_input.rows;
     float width = gImg_input.cols;
 
-    float r = std::min(inp_h / height, inp_w / width);
+    float r = std::min(size.height / height, size.width / width);
     int padw = std::round(width * r);
     int padh = std::round(height * r);
 
@@ -226,8 +256,8 @@ void Detector_TensorRT::letterbox(cv::cuda::GpuMat &gImg_input, cv::Size &size)
         cv::cuda::resize(gImg_input, gImg_input, cv::Size(padw, padh));
     }
 
-    float dw = inp_w - padw;
-    float dh = inp_h - padh;
+    float dw = size.width - padw;
+    float dh = size.height - padh;
 
     dw /= 2.0f;
     dh /= 2.0f;
@@ -275,9 +305,9 @@ inline static float clamp(float val, float min, float max)
 {
     return val > min ? (val < max ? val : max) : min;
 }
-ImagesDetectedObject Detector_TensorRT::postprocess()
+Frames_Detection Detector_TensorRT::postprocess()
 {
-    ImagesDetectedObject res_OneShot;
+    Frames_Detection resFrame;
 
     int* num_dets = static_cast<int*>(host_ptrs[0]);
     auto* boxes = static_cast<float*>(host_ptrs[1]);
@@ -300,18 +330,19 @@ ImagesDetectedObject Detector_TensorRT::postprocess()
         y0 = clamp(y0 * ratio, 0.f, height);
         x1 = clamp(x1 * ratio, 0.f, width);
         y1 = clamp(y1 * ratio, 0.f, height);
-        DetectedObject result;
 
+        DetectedObject result;
         result.box.x = x0;
         result.box.y = y0;
         result.box.width = x1 - x0;
         result.box.height = y1 - y0;
         result.classID = *(labels + i);
-        result.className = _classNamesList[result.classID];
+        if(_classNamesList.size() > result.classID)
+            result.className = _classNamesList[result.classID];
         result.confidence = *(scores + i);
 
-        res_OneShot.push_back(result);
+        resFrame.detections.push_back(result);
     }
 
-    return res_OneShot;
+    return resFrame;
 }

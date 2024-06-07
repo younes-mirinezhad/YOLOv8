@@ -15,49 +15,61 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 add_executable(${PROJECT_NAME}
   main.cpp
-  processingthread.h processingthread.cpp
+
   detector.h detector.cpp
   detector_tensorrt.h detector_tensorrt.cpp
   detector_opencv_dnn.h detector_opencv_dnn.cpp
 )
 target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
 
-# ----------------- CUDA ------------------#
-message("***** CUDA")
+###################################################################
 
-SET(CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
-set(CMAKE_CUDA_ARCHITECTURES 60 61 62 70 72 75 86)
-if (NOT CMAKE_CUDA_COMPILER)
-    set(CMAKE_CUDA_COMPILER  ${CUDA_COMPILER})
+if(POLICY CMP0146)
+    cmake_policy(SET CMP0146 OLD)
 endif()
 
+###################################################################
+message("##### Finding spdlog")
+
+include_directories(${CMAKE_SOURCE_DIR}/thirdParty/spdlog/include)
+
+###################################################################
+message("##### Find CUDA")
+
+set(CMAKE_CUDA_ARCHITECTURES 60 61 62 70 72 75 86)
+if (NOT CMAKE_CUDA_COMPILER)
+    set(CMAKE_CUDA_COMPILER  "/usr/local/cuda/bin/nvcc")
+endif()
 find_package(CUDA)
+
 if(CUDA_FOUND)
-    message("********** CUDA " ${CUDA_VERSION} " founded in: " ${CUDA_INCLUDE_DIRS})
-    ADD_DEFINITIONS( -DCUDA_STATUS=true )
+    message("########## CUDA " ${CUDA_VERSION} " founded in: " ${CUDA_TOOLKIT_ROOT_DIR})
+    message(CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS})
+    message(CUDA_LIBRARIES: ${CUDA_LIBRARIES})
+
     target_include_directories(${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${CUDA_LIBRARIES})
 else()
     message("********** ERROR: CUDA not founded")
-    ADD_DEFINITIONS( -DCUDA_STATUS=false )
 endif(CUDA_FOUND)
 
-# ----------------- OpenCV  ------------------#
-message("***** OpenCV")
+###################################################################
+message("##### Finding OpenCV")
 
 find_package(OpenCV REQUIRED)
+
+message("########## OpenCV " ${OpenCV_VERSION} " founded in: " ${OpenCV_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
-message("********** OpenCV " ${OpenCV_VERSION} " founded in: " ${OpenCV_INCLUDE_DIRS})
 
-# ----------------- TensorRT  ------------------#
-message("***** TensorRT")
+###################################################################
+message("##### TensorRT")
 
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer.so")
 target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so")
-target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-12.1/targets/x86_64-linux/lib/libcudart.so")
+# target_link_libraries(${PROJECT_NAME} "/usr/local/cuda-12.1/targets/x86_64-linux/lib/libcudart.so")
 
-# --------------------------------------------#
+###################################################################
 
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}

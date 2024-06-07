@@ -4,6 +4,10 @@
 #include "NvOnnxParser.h"
 #include <fstream>
 
+void TrtLogger::setLogSeverity(Severity severity)
+{
+    m_severity = severity;
+}
 void TrtLogger::log(Severity severity, const char *msg) noexcept
 {
     if (severity <= m_severity) {
@@ -28,10 +32,6 @@ void TrtLogger::log(Severity severity, const char *msg) noexcept
             break;
         }
     }
-}
-void TrtLogger::setLogSeverity(Severity severity)
-{
-    m_severity = severity;
 }
 
 EngineBuilder::EngineBuilder(const std::string &onnxPath, const std::string &enginePath, QObject *parent)

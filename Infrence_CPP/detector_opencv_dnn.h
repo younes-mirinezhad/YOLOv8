@@ -9,9 +9,9 @@ public:
     explicit Detector_OpenCV_DNN(QObject *parent = nullptr);
     ~Detector_OpenCV_DNN();
 
-    bool LoadModel(QString &modelPath) override;
-    ImagesDetectedObject detect(cv::Mat &srcImg) override;
-    ImagesDetectedObject detect(cv::cuda::GpuMat &srcImg) override;
+    bool LoadModel(std::string &modelPath) override;
+    Frames_Detection detect(cv::Mat &srcImg) override;
+    Frames_Detection detect(cv::cuda::GpuMat &srcImg) override;
 
 private:
     cv::dnn::Net net;

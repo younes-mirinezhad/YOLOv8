@@ -3,60 +3,43 @@
 
 #include "detector_opencv_dnn.h"
 #include <QFileInfo>
-
-#if CUDA_STATUS
-#define CUDA_Availability true
-#else
-#define CUDA_Availability false
-#endif
+#include "spdlog/spdlog.h"
 
 Detector_OpenCV_DNN::Detector_OpenCV_DNN(QObject *parent) : Detector{parent} {}
 
 Detector_OpenCV_DNN::~Detector_OpenCV_DNN() {}
 
-bool Detector_OpenCV_DNN::LoadModel(QString &modelPath)
+bool Detector_OpenCV_DNN::LoadModel(std::string &modelPath)
 {
-    qDebug() << Q_FUNC_INFO << modelPath;
+    spdlog::info("{} -----> Loading model: {}", Q_FUNC_INFO, modelPath);
 
-    if (!(QFileInfo::exists(modelPath) && QFileInfo(modelPath).isFile())) {
-        qDebug() << "----- Model path does not exist,  please check " << modelPath;
+    if (!(QFileInfo::exists(QString::fromStdString(modelPath))
+          && QFileInfo(QString::fromStdString(modelPath)).isFile())) {
+        spdlog::info("{} -----> Model path does not exist", Q_FUNC_INFO);
         return false;
     }
 
-#if CUDA_Availability
-    qDebug() << "----- Founded CUDA device info";
-    int cuda_devices_count = cv::cuda::getCudaEnabledDeviceCount();
-    for (int dev = 0; dev < cuda_devices_count; ++dev) {
-        qDebug() << " -------------------------------------------------- ";
-        cv::cuda::printCudaDeviceInfo(dev);
-        qDebug() << " -------------------------------------------------- ";
-    }
-#endif
-
     try
     {
-        net = cv::dnn::readNetFromONNX(modelPath.toStdString());
+        net = cv::dnn::readNetFromONNX(modelPath);
 
-#if CUDA_Availability
-        qDebug() << "----- Inference device: CUDA";
+        spdlog::info("{} -----> Inference device: CUDA", Q_FUNC_INFO);
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
         net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
-        qDebug() << "---------- Model is loaded ";
-#else
-        qDebug() << "----- Inference device: CPU";
-        net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-        net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-        qDebug() << "---------- Model is loaded ";
-#endif
-    }
-    catch (const std::exception&) {
-        qDebug() << "----- Can't load model:" << modelPath;
+        spdlog::info("{} ----------> Model is loaded.", Q_FUNC_INFO);
+
+        // spdlog::info("{} -----> Inference device: CPU", Q_FUNC_INFO);
+        // net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+        // net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+        // spdlog::info("{} ----------> Model is loaded.", Q_FUNC_INFO);
+    } catch (const std::exception&) {
+        spdlog::info("{} ----------> Can't load model.", Q_FUNC_INFO);
         return false;
     }
     return true;
 }
 
-ImagesDetectedObject Detector_OpenCV_DNN::detect(cv::Mat &srcImg)
+Frames_Detection Detector_OpenCV_DNN::detect(cv::Mat &srcImg)
 {
     cv::Mat modelInput = srcImg;
 
@@ -120,7 +103,7 @@ ImagesDetectedObject Detector_OpenCV_DNN::detect(cv::Mat &srcImg)
     std::vector<int> nms_result;
     cv::dnn::NMSBoxes(boxes, confidences, modelScoreThreshold, modelNMSThreshold, nms_result);
 
-    ImagesDetectedObject detections{};
+    Frames_Detection detections{};
     for (unsigned long i = 0; i < nms_result.size(); ++i)
     {
         int idx = nms_result[i];
@@ -131,7 +114,7 @@ ImagesDetectedObject Detector_OpenCV_DNN::detect(cv::Mat &srcImg)
         result.className = _classNamesList[result.classID];
         result.box = boxes[idx];
 
-        detections.push_back(result);
+        detections.detections.push_back(result);
     }
 
     return detections;
@@ -147,9 +130,9 @@ cv::Mat Detector_OpenCV_DNN::formatToSquare(const cv::Mat &source)
     return result;
 }
 
-ImagesDetectedObject Detector_OpenCV_DNN::detect(cv::cuda::GpuMat &srcImg)
+Frames_Detection Detector_OpenCV_DNN::detect(cv::cuda::GpuMat &srcImg)
 {
-    qDebug() << Q_FUNC_INFO << "***** Need to fix";
+    spdlog::error("{} ***** Need to fix.", Q_FUNC_INFO);
     return {};
 }
 
