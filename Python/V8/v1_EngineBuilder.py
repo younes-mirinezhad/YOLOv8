@@ -36,17 +36,20 @@ class Builder():
         self._fp16 = True # Build model with fp16 mode
 
     def setModelPath(self, modelPath_PT, odelPath_ONNX, modelPath_Engine):
+        print("----- setModelPath")
         self._modelPath_PT = modelPath_PT
         self._modelPath_ONNX = odelPath_ONNX
         self._modelPath_Engine = modelPath_Engine
     
     def setConfigs(self, input_shape, topk, conf_thres, iou_thres):
+        print("----- setConfigs")
         self._input_shape = input_shape
         self._topk = topk
         self._conf_thres = conf_thres
         self._iou_thres = iou_thres
 
     def build(self):
+        print("----- Start building")
         if not os.path.exists(self._modelPath_PT):
             print(f"Torch model not find in this path: {self._modelPath_PT}")
             return
@@ -58,6 +61,7 @@ class Builder():
             self.Engine_Export()
 
     def ONNX_Export(self):
+        print("----- ONNX_Export")
         PostDetect.conf_thres = self._conf_thres
         PostDetect.iou_thres = self._iou_thres
         PostDetect.topk = self._topk
@@ -104,6 +108,7 @@ class Builder():
         print(f"-----> ONNX exports successfully: {self._modelPath_ONNX}")
     
     def Engine_Export(self):
+        print("----- Engine_Export")
         builder = EngineBuilder(self._modelPath_ONNX, self._device)
         builder.seg = self._seg
         enginePath = builder.build(self._fp16, self._input_shape, self._iou_thres, self._conf_thres, self._topk)
@@ -247,8 +252,7 @@ class EngineBuilder:
         trt.init_libnvinfer_plugins(logger, namespace='')
         builder = trt.Builder(logger)
         config = builder.create_builder_config()
-        config.max_workspace_size = torch.cuda.get_device_properties(
-            self.device).total_memory
+        config.max_workspace_size = torch.cuda.get_device_properties(self.device).total_memory
         flag = (1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
         network = builder.create_network(flag)
 

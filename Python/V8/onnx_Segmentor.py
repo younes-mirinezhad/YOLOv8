@@ -5,6 +5,7 @@ import math
 
 class ONNX_Segmentor():
     def __init__(self):
+        self.use_gpu = True
         self.class_names = []
         self.colors = []
         self.session = None
@@ -23,8 +24,13 @@ class ONNX_Segmentor():
         self.colors = rng.uniform(0, 255, size=(len(className), 3))
 
     def loadModel(self, modelPath):
-        # Load model
-        self.session = onnxruntime.InferenceSession(modelPath)
+        print("--- loading model")
+        print("--- availble providers:", onnxruntime.get_available_providers())
+
+        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if self.use_gpu  else ["CPUExecutionProvider"]
+        self.session = onnxruntime.InferenceSession(modelPath, providers=providers)
+
+        print("------ model loaded. current providers:", providers)
 
         # Get model inputs info
         model_inputs = self.session.get_inputs()
@@ -35,22 +41,15 @@ class ONNX_Segmentor():
         model_outputs = self.session.get_outputs()
         self.output_names = [model_outputs[i].name for i in range(len(model_outputs))]
 
+        print("------ model input shape:", self.input_shape)
+
     def inference(self, org_img):
         input_tensor = self.preprocess(org_img)
 
         # Perform inference on the image
         outputs = self.session.run(self.output_names, {self.input_names[0]: input_tensor})
 
-        self.boxes, self.scores, self.class_ids, mask_pred = self.process_box_output(outputs[0])
-        self.mask_maps = self.process_mask_output(mask_pred, outputs[1])
-
-        # return self.boxes, self.scores, self.class_ids, self.mask_maps
-    
-        combined_img = self.draw_masks(org_img, draw_scores=True, mask_alpha=0.9)
-
-        # combined_img = self.draw_masks_C(org_img, mask_alpha=0.9)
-
-        return combined_img
+        return outputs
     
     def preprocess(self, image):
         self.img_height, self.img_width = image.shape[:2]
@@ -66,6 +65,15 @@ class ONNX_Segmentor():
         input_tensor = input_img[np.newaxis, :, :, :].astype(np.float32)
 
         return input_tensor
+
+    def draw(self, results, image):
+        self.boxes, self.scores, self.class_ids, mask_pred = self.process_box_output(results[0])
+        self.mask_maps = self.process_mask_output(mask_pred, results[1])
+
+        combined_img = self.draw_masks(image, draw_scores=True, mask_alpha=0.9)
+        # combined_img = self.draw_masks_C(image, mask_alpha=0.9)
+
+        return combined_img
 
     def process_box_output(self, box_output):
 

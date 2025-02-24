@@ -54,6 +54,6 @@ compile_commands.json
 *_qmlcache.qrc
 
 Files
-Python/venv
+files
 *__pycache__*
 CPP/*/build/
