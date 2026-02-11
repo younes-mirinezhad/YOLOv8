@@ -1,0 +1,27 @@
+model_name: yolo26n.pt # model checkpoint or config to load (yolov8n.pt , yolo11n.pt , yolo26n.pt)
+yaml_path: dataset.yaml # dataset config file
+hyperparameters_path: hyperparameters.yaml # path to hyperparameters file
+project: runs/detection # base directory for training outputs
+name: Train_1 # run name (null to auto-generate)
+epochs: 100 # total training epochs
+imgsz: 640 # image size used for training and validation
+batch: 32 # batch size per iteration
+device: '0' # compute device id(s), e.g. '0' or '0,1' or 'cpu'
+lr0: 0.01 # initial learning rate
+lrf: 0.01 # final learning rate multiplier
+optimizer: auto # optimizer choice: auto, SGD, Adam, AdamW, RMSProp
+weight_decay: 0.0005 # weight decay for optimizer
+momentum: 0.937 # optimizer momentum
+warmup_epochs: 3 # warmup duration in epochs
+warmup_momentum: 0.8 # warmup starting momentum
+warmup_bias_lr: 0.1 # warmup bias learning rate
+patience: 100 # early stopping patience (epochs)
+save: true # save training artifacts
+save_period: -1 # checkpoint save interval (epochs); -1 for final only
+cache: false # cache images/labels in RAM
+workers: 8 # dataloader worker processes
+exist_ok: false # allow overwriting existing run dir
+pretrained: true # initialize from pretrained weights
+verbose: true # verbose logging
+val: true # run validation during training
+plots: true # generate training plots

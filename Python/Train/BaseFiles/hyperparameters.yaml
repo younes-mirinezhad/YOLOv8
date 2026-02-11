@@ -1,0 +1,15 @@
+# YOLO training hyperparameters (augmentations and related settings)
+augment: true # master switch for data augmentation
+fliplr: 0.5 # probability of left-right flip
+flipud: 0.0 # probability of up-down flip
+mosaic: 0.5 # probability of mosaic augmentation
+mixup: 0.1 # probability of mixup augmentation
+copy_paste: 0.0 # probability of copy-paste augmentation
+degrees: 5.0 # rotation range in degrees
+translate: 0.1 # translation range as fraction of image size
+scale: 0.5 # scale range as fraction of image size
+shear: 0.0 # shear angle in degrees
+perspective: 0.0 # perspective transform magnitude
+hsv_h: 0.015 # hue augmentation fraction
+hsv_s: 0.7 # saturation augmentation fraction
+hsv_v: 0.4 # value/brightness augmentation fraction
