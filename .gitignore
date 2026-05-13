@@ -1,3 +1,6 @@
 Python/Train/venv/
 Python/Train/Petanux/
+Python/Train/Watchtower/
+Python/Train/BaseModels/
 Python/Train/*.pt
+*__pycache__*
