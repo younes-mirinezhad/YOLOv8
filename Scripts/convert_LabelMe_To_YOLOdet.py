@@ -4,13 +4,11 @@ import shutil
 import cv2
 
 # Update these to match your dataset locations
-INPUT_DIR = (
-    "/media/HDD_1/Work/Projects/Watchtower/02_Flare/Dataset/3_Approved/V2_DarkSmoke"
-)
-OUTPUT_DIR = "/media/HDD_1/Work/Projects/Watchtower/02_Flare/Dataset/4_YOLO_Format"
+INPUT_DIR = "/mnt/HDD_1/Work/Projects/YOLO/Python/Train/Petanux/Benana"
+OUTPUT_DIR = "/mnt/HDD_1/Work/Projects/YOLO/Python/Train/Petanux/Benana_YOLOdet"
 
 # Extend/adjust as needed. Unknown labels are skipped.
-LABEL_MAP = {"Flame": 0, "Smoke": 1, "Flare": 2, "Snow": 3}
+LABEL_MAP = {"benana": 0, "lvl_red": 1, "lvl_green": 2, "lvl_blue": 3}
 
 
 def get_subfolders(directory: str):

@@ -1,9 +1,9 @@
 import os, json, shutil, cv2
 
-input_dir = "/media/HDD_2/Dataset/Watchtower/3_Approved/V2_DarkSmoke"
-output_dir = "/media/HDD_2/Dataset/Watchtower/4_YOLO_Format"
+input_dir = "Petanux/ShelfGapsSegmentation/dataset/labels"
+output_dir = "Petanux/ShelfGapsSegmentation/dataset/labels_YOLO_Format"
 
-LABEL_MAP = {"Flame": 0, "Smoke": 1, "Flare": 2}
+LABEL_MAP = {"gap": 0}
 
 
 def get_subfolders(directory):
@@ -27,7 +27,7 @@ def convert_labelme_to_yolo(input_dir, output_dir):
         txt_path = os.path.join(output_dir, file_name.replace(".json", ".txt"))
         convert_labelme_to_yolo_seg(json_path, txt_path)
         shutil.copy(
-            json_path.replace(".json", ".jpg"), txt_path.replace(".txt", ".jpg")
+            json_path.replace(".json", ".webp"), txt_path.replace(".txt", ".webp")
         )
         counter += 1
     return counter
@@ -41,7 +41,7 @@ def convert_labelme_to_yolo_seg(json_path, output_txt_path):
         img_width = data["imageWidth"]
         img_height = data["imageHeight"]
     except:
-        img_path = json_path.replace(".json", ".jpg")
+        img_path = json_path.replace(".json", ".webp")
         img = cv2.imread(img_path)
         img_height, img_width, _ = img.shape
 

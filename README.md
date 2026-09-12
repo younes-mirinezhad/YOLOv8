@@ -8,7 +8,7 @@ Supports YOLOv8, YOLOv10, YOLOv11, and YOLOv26 detection and segmentation models
 
 ### 1. Prepare Your Project Files
 
-Copy the `Python/Train/BaseFiles/` folder to a new location for your project (e.g., `Python/Train/MyProject/`). It contains:
+Copy the `Train/BaseFiles/` folder to a new location for your project (e.g., `Train/MyProject/`). It contains:
 
 - `config.yaml` — main training configuration
 - `dataset.yaml` — dataset paths and class names
@@ -48,23 +48,28 @@ names:
   1: ClassName2
 ```
 
+
+
 ### 4. Edit `config.yaml`
 
 Configure the training run. Key fields:
 
-| Field | Description | Example |
-|---|---|---|
-| `model_name` | Base model checkpoint | `yolo11n.pt`, `yolo26m-seg.pt` |
-| `yaml_path` | Path to `dataset.yaml` | `dataset.yaml` |
-| `hyperparameters_path` | Path to `hyperparameters.yaml` | `hyperparameters.yaml` |
-| `project` | Output directory for runs | `runs/detection` |
-| `name` | Run name | `Train_1` |
-| `epochs` | Number of training epochs | `100` |
-| `imgsz` | Input image size | `640` |
-| `batch` | Batch size | `32` |
-| `device` | GPU id(s) or `cpu` | `'0'` or `'0,1'` |
-| `lr0` | Initial learning rate | `0.01` |
-| `patience` | Early stopping patience | `100` |
+
+| Field                  | Description                    | Example                        |
+| ---------------------- | ------------------------------ | ------------------------------ |
+| `model_name`           | Base model checkpoint          | `yolo11n.pt`, `yolo26m-seg.pt` |
+| `yaml_path`            | Path to `dataset.yaml`         | `dataset.yaml`                 |
+| `hyperparameters_path` | Path to `hyperparameters.yaml` | `hyperparameters.yaml`         |
+| `project`              | Output directory for runs      | `runs/detection`               |
+| `name`                 | Run name                       | `Train_1`                      |
+| `epochs`               | Number of training epochs      | `100`                          |
+| `imgsz`                | Input image size               | `640`                          |
+| `batch`                | Batch size                     | `32`                           |
+| `device`               | GPU id(s) or `cpu`             | `'0'` or `'0,1'`               |
+| `lr0`                  | Initial learning rate          | `0.01`                         |
+| `patience`             | Early stopping patience        | `100`                          |
+
+
 
 
 ### 5. Edit `hyperparameters.yaml` (optional)
@@ -83,15 +88,19 @@ hsv_s: 0.7        # saturation jitter
 hsv_v: 0.4        # brightness jitter
 ```
 
+
+
 ### 6. Run Training
 
-Navigate to `Python/Train/` and run:
+Navigate to `Train/` and run:
 
 ```bash
 python main.py --train --config /path/to/your/config.yaml
 ```
 
 ---
+
+
 
 ## Exporting a Trained Model
 
@@ -111,14 +120,18 @@ Supported export formats: `onnx`
 
 ---
 
+
+
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `Scripts/convert_LabelMe_To_YOLOdet.py` | Convert LabelMe annotations to YOLO detection format |
+
+| Script                                  | Description                                             |
+| --------------------------------------- | ------------------------------------------------------- |
+| `Scripts/convert_LabelMe_To_YOLOdet.py` | Convert LabelMe annotations to YOLO detection format    |
 | `Scripts/convert_LabelMe_To_YOLOseg.py` | Convert LabelMe annotations to YOLO segmentation format |
-| `Scripts/convert_VGG_To_LabelMe.py` | Convert VGG annotations to LabelMe format |
-| `Scripts/convertor_VGG_To_YOLOv8.py` | Convert VGG annotations directly to YOLOv8 format |
-| `Scripts/convertSeg2Det.py` | Convert segmentation labels to detection format |
-| `Scripts/Train-Test-Split.py` | Split dataset into train/val/test sets |
+| `Scripts/convert_VGG_To_LabelMe.py`     | Convert VGG annotations to LabelMe format               |
+| `Scripts/convertor_VGG_To_YOLOv8.py`    | Convert VGG annotations directly to YOLOv8 format       |
+| `Scripts/convertSeg2Det.py`             | Convert segmentation labels to detection format         |
+| `Scripts/Train-Test-Split.py`           | Split dataset into train/val/test sets                  |
+
 

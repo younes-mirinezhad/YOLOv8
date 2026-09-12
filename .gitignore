@@ -1,6 +1,6 @@
-Python/Train/venv/
-Python/Train/Petanux/
-Python/Train/Watchtower/
-Python/Train/BaseModels/
-Python/Train/*.pt
+Train/venv/
+Train/Petanux/
+Train/Watchtower/
+Train/BaseModels/
+Train/*.pt
 *__pycache__*
